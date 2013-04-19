@@ -84,9 +84,11 @@ class Kernels
       puts "Packages are being uninstalled, please stand by..."
       `apt-get purge -y #{packages_list.split.join("\s")}`
       if $? == 0
-        puts "Successfully removed the kernel packages for: #{kernels_to_remove}"
-        puts "Now you will want to update your bootloader."
-        puts "    (i.e. `sudo update-grub2` if you are using grub2)"
+        puts "Successfully removed the kernel packages for: #{kernels_to_remove.join(', ')}"
+        puts ""
+        puts "### NOTE: Now you will want to update your bootloader."
+        puts "###       (i.e. `sudo update-grub2` if you are using grub2)"
+        puts ""
       else
         puts "ERROR: apt-get purge failed with exit code #{$?}"
       end
