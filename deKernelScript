@@ -1,6 +1,10 @@
 #!/usr/bin/env ruby
 
-require 'lib/de_kernel/de_kernel.rb'
-require 'lib/de_kernel/kernels.rb'
+libdir = "#{File.expand_path(File.dirname(__FILE__))}/lib"
+$LOAD_PATH.unshift(libdir) unless $LOAD_PATH.include?(libdir)
+
+require 'deKernel'
+require 'kernels'
+require 'messages'
 
 DeKernel.run
