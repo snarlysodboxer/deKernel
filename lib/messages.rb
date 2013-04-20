@@ -55,8 +55,7 @@ class Messages
       count = installed_kernels.length
       case
       when count == 0
-        puts "ERROR: No kernels found in /boot"
-        exit
+        raise "ERROR: No kernels found in the /boot directory!"
       when count == 1
         puts "Only one kernel found!"
       when count >= 2
