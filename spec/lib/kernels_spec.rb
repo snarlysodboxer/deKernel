@@ -21,5 +21,13 @@ describe 'Kernels' do
       end
     end
   end
+
+  # private methods, test them or not?
+  #   find_all_kernels
+  #   find_installed_kernels(all_kernels)
+  #   create_kernels_to_remove_list(installed_kernels)
+  #   find_kernel_packages(kernels_to_remove)
+  #   confirm_removals(kernels_to_remove, installed_kernels)
+
 end
 
