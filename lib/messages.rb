@@ -30,7 +30,8 @@ class Messages
     def print_purge_packages_success(kernels_to_remove)
       $stdout.puts "Successfully removed the kernel packages for: #{kernels_to_remove.join(', ')}"
       $stdout.puts ""
-      $stdout.puts "### NOTE: Now you will want to update your bootloader."
+      $stdout.puts "### NOTE: Usually apt-get will update your bootloader automatically,"
+      $stdout.puts "###       but if you have any trouble you may need to update it manually."
       $stdout.puts "###       (i.e. `sudo update-grub2` if you are using grub2)"
       $stdout.puts ""
       system("sudo apt-get clean")
