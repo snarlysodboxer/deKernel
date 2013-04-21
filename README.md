@@ -7,7 +7,7 @@ deKernel
 #### Instructions
 1. `git clone git@github.com:snarlysodboxer/deKernel.git`
 2. `cd deKernel`
-3. `sudo ./deKernelScript`
+3. `./deKernelScript`
 4. Follow the directions! It will confirm with you before making any changes.
 
 #### NOTES

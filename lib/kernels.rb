@@ -17,8 +17,7 @@ class Kernels
       packages_list = find_kernel_packages(kernels_to_remove)
       unless packages_list.nil?
         $stdout.puts "Packages are being uninstalled, please stand by..."
-        #Kernel.send(:`, "sudo apt-get purge -y #{packages_list.split.join('\s')}")
-        Kernel.send(:`, "sudo apt-get purge -y #{packages_list.split.join('')}") ## TODO unbreak this; join by \s.
+        Kernel.send(:`, "sudo apt-get purge -y #{packages_list.split.join("\s")}")
         $? == 0 ? result_and_message = ["success", kernels_to_remove] :
                   result_and_message = ["failure", $?]
         Messages.send("print_purge_packages_#{result_and_message[0]}", result_and_message[1])
