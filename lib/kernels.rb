@@ -16,9 +16,9 @@ class Kernels
     def purge_packages_from_a_list_of_kernels(kernels_to_remove)
       packages_list = find_kernel_packages(kernels_to_remove)
       unless packages_list.nil?
-        puts "Packages are being uninstalled, please stand by..."
-        #`apt-get purge -y #{packages_list.split.join("\s")}`
-        `apt-get purge -y #{packages_list.split.join("")}` ## TODO unbreak this
+        $stdout.puts "Packages are being uninstalled, please stand by..."
+        #Kernel.send(:`, "sudo apt-get purge -y #{packages_list.split.join('\s')}")
+        Kernel.send(:`, "sudo apt-get purge -y #{packages_list.split.join('')}") ## TODO unbreak this; join by \s.
         $? == 0 ? result_and_message = ["success", kernels_to_remove] :
                   result_and_message = ["failure", $?]
         Messages.send("print_purge_packages_#{result_and_message[0]}", result_and_message[1])
@@ -47,7 +47,7 @@ class Kernels
         print "Do you want to remove the #{kernel} kernel [y/N/yes/NO/?]"
         arg = ARGF.first.strip
         if arg == "y" or arg == "yes"
-          puts "Marking #{kernel} for removal"
+          $stdout.puts "Marking #{kernel} for removal"
           kernels_to_remove << kernel
         end
       end
@@ -58,7 +58,7 @@ class Kernels
       packages_list = String.new
       kernels_to_remove.each do |kernel|
         $stdout.flush
-        puts kernel
+        $stdout.puts kernel
         packages_list += `dpkg -l | grep ^ii | grep "#{kernel}" | cut -d' ' -f3`
       end
       if packages_list == ""
@@ -71,7 +71,7 @@ class Kernels
     end
 
     def confirm_removals(kernels_to_remove, installed_kernels)
-      puts ""
+      $stdout.puts ""
       if kernels_to_remove.length > 0
         system "clear"
         Messages.confirm_kernels_to_be_removed(kernels_to_remove, installed_kernels)
