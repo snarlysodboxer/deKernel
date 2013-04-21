@@ -20,6 +20,7 @@ class Kernels
         IO.send(:popen, "sudo apt-get purge -y #{packages_list.split.join("\s")}") { |p| p.each { |f| $stdout.puts f } }
         $? == 0 ? result_and_message = ["success", kernels_to_remove] :
                   result_and_message = ["failure", $?]
+        Kernel.system "sudo apt-get clean"
         Messages.send("print_purge_packages_#{result_and_message[0]}", result_and_message[1])
       end
     end

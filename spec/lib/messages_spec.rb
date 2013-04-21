@@ -76,7 +76,8 @@ describe 'Messages' do
       output = capture_stdout { Messages.print_purge_packages_success(@all_kernels.drop(2)) }
 
       ["Successfully removed the kernel packages for: #{@all_kernels.drop(2).join(', ')}",
-      "### NOTE: Now you will want to update your bootloader."].each do |string|
+      "### NOTE: Usually apt-get will update your bootloader automatically,",
+      "###       but if you have any trouble you may need to update it manually."].each do |string|
         expect(output).to match string
       end
     end
@@ -84,7 +85,7 @@ describe 'Messages' do
 
   context "#print_purge_packages_failure(exit_code)" do
     it "prints failed purge message" do
-      $stderr.should_receive(:puts).with("ERROR: apt-get purge failed with exit code \"12345\"")
+      $stderr.should_receive(:puts).with("ERROR: apt-get purge failed with \"12345\"")
       Messages.print_purge_packages_failure("12345")
     end
   end
