@@ -11,7 +11,7 @@ RSpec.configure do |c|
     @installed_kernels = @all_kernels.drop(1)
   end
 
-  def capture_stout(&block)
+  def capture_stdout(&block)
     original_stdout = $stdout
     $stdout = fake = StringIO.new
     begin

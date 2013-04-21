@@ -54,7 +54,7 @@ describe 'Kernels' do
         it "prints 'packages being uninstalled' message" do
           Kernels.stub!(:find_kernel_packages).and_return("package1 package2")
           #$stdout.should_receive(:puts).with("Packages are being uninstalled, please stand by...") ## couldn't get this work, why?
-          output = capture_stout { Kernels.purge_packages_from_a_list_of_kernels(@installed_kernels.first(1)) }
+          output = capture_stdout { Kernels.purge_packages_from_a_list_of_kernels(@installed_kernels.first(1)) }
           expect(output).to match "Packages are being uninstalled, please stand by..."
         end
 
@@ -92,4 +92,3 @@ describe 'Kernels' do
     end
   end
 end
-

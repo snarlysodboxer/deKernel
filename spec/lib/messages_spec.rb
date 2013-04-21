@@ -18,7 +18,7 @@ describe 'Messages' do
 
     context "when installed_kernels = 1" do
       it "prints 'only one kernel found' message" do
-        output = capture_stout { Messages.print_installed_kernels(@installed_kernels.last(1)) }
+        output = capture_stdout { Messages.print_installed_kernels(@installed_kernels.last(1)) }
 
         expect(output).to match "Only one kernel found!"
       end
@@ -26,14 +26,14 @@ describe 'Messages' do
 
     context "when installed_kernels > 1" do
       it "prints 'multiple kernels found' message" do
-        output = capture_stout { Messages.print_installed_kernels(@installed_kernels) }
+        output = capture_stdout { Messages.print_installed_kernels(@installed_kernels) }
 
         expect(output).to match "Found #{@installed_kernels.length} kernels installed:"
       end
     end
 
     it "prints kernels" do
-      output = capture_stout { Messages.print_installed_kernels(@installed_kernels) }
+      output = capture_stdout { Messages.print_installed_kernels(@installed_kernels) }
 
       @installed_kernels.each do |kernel|
         expect(output).to match kernel
@@ -46,7 +46,7 @@ describe 'Messages' do
       before :each do
         Kernels.stub!(:find_kernels).
           and_return({ :all => @all_kernels, :installed => @installed_kernels })
-        @output = capture_stout { Messages.print_other_kernels }
+        @output = capture_stdout { Messages.print_other_kernels }
       end
       it "should print 'you have other kernels' message" do
         ["### NOTE: You have kernels in your /boot directory that have no corresponding packages installed.",
@@ -65,7 +65,7 @@ describe 'Messages' do
     it "should print nothing if other_kernels.length == 0" do
       Kernels.stub!(:find_kernels).
         and_return({ :all => @installed_kernels, :installed => @installed_kernels })
-      output = capture_stout { Messages.print_other_kernels }
+      output = capture_stdout { Messages.print_other_kernels }
 
       expect(output.to_s).to be_empty
     end
@@ -73,7 +73,7 @@ describe 'Messages' do
 
   context "#print_purge_packages_success(kernels_to_remove)" do
     it "should print successful purge message" do
-      output = capture_stout { Messages.print_purge_packages_success(@all_kernels.drop(2)) }
+      output = capture_stdout { Messages.print_purge_packages_success(@all_kernels.drop(2)) }
 
       ["Successfully removed the kernel packages for: #{@all_kernels.drop(2).join(', ')}",
       "### NOTE: Now you will want to update your bootloader."].each do |string|
@@ -91,14 +91,14 @@ describe 'Messages' do
 
   context "#confirm_kernels_to_be_removed(kernels_to_remove, installed_kernels)" do
     it "prints 'multiple kernels message' when multiple kernels" do
-      output = capture_stout {
+      output = capture_stdout {
         Messages.confirm_kernels_to_be_removed(@installed_kernels.drop(1), @installed_kernels) }
 
       expect(output).to match "The #{@installed_kernels.drop(1).length
                                      } kernels marked with asterisks will be apt-get purged:"
     end
     it "prints 'singular kernel message' when only one kernel" do
-      output = capture_stout {
+      output = capture_stdout {
         Messages.confirm_kernels_to_be_removed(@installed_kernels.first(1), @installed_kernels) }
 
       ["The kernel marked with asterisks will be apt-get purged:",
