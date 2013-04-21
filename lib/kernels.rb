@@ -15,12 +15,14 @@ class Kernels
 
     def purge_packages_from_a_list_of_kernels(kernels_to_remove)
       packages_list = find_kernel_packages(kernels_to_remove)
-      puts "Packages are being uninstalled, please stand by..."
-      #`apt-get purge -y #{packages_list.split.join("\s")}`
-      `apt-get purge -y #{packages_list.split.join("")}` ## TODO unbreak this
-      $? == 0 ? result_and_message = ["success", kernels_to_remove] :
-                result_and_message = ["failure", $?]
-      Messages.send("print_purge_packages_#{result_and_message[0]}", result_and_message[1])
+      unless packages_list.nil?
+        puts "Packages are being uninstalled, please stand by..."
+        #`apt-get purge -y #{packages_list.split.join("\s")}`
+        `apt-get purge -y #{packages_list.split.join("")}` ## TODO unbreak this
+        $? == 0 ? result_and_message = ["success", kernels_to_remove] :
+                  result_and_message = ["failure", $?]
+        Messages.send("print_purge_packages_#{result_and_message[0]}", result_and_message[1])
+      end
     end
 
     private
@@ -60,9 +62,9 @@ class Kernels
         packages_list += `dpkg -l | grep ^ii | grep "#{kernel}" | cut -d' ' -f3`
       end
       if packages_list == ""
-        puts "ERROR: No packages to remove."
+        $stderr.puts "ERROR: No packages to remove."
         Messages.print_other_kernels
-        exit
+        Kernel.exit
       else
         packages_list
       end
@@ -75,14 +77,14 @@ class Kernels
         Messages.confirm_kernels_to_be_removed(kernels_to_remove, installed_kernels)
         confirmation = ARGF.first.strip
         unless confirmation == "y" || confirmation == "yes"
-          puts "Canceled!"
+          $stderr.puts "Canceled!"
           Messages.print_other_kernels
-          exit
+          Kernel.exit
         end
       else
-        puts "No kernels selected!"
+        $stderr.puts "No kernels selected!"
         Messages.print_other_kernels
-        exit
+        Kernel.exit
       end
       kernels_to_remove
     end
