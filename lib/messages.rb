@@ -33,6 +33,7 @@ class Messages
       $stdout.puts "### NOTE: Now you will want to update your bootloader."
       $stdout.puts "###       (i.e. `sudo update-grub2` if you are using grub2)"
       $stdout.puts ""
+      system("sudo apt-get clean")
     end
 
     def print_purge_packages_failure(exit_code)
@@ -48,6 +49,10 @@ class Messages
         kernels_to_remove.include?(kernel) ? ($stdout.puts "**#{kernel}**") : ($stdout.puts "  #{kernel}  ")
       end
       $stdout.puts "Are you sure you want to continue [y/N/yes/NO/?]"
+    end
+
+    def get_free_disk_space
+      Kernel.send(:`, "df -BM /boot").split[10].to_i
     end
 
     private
