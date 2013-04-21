@@ -2,19 +2,30 @@ require 'spec_helper'
 
 describe 'Messages' do
   context "#print_installed_kernels(installed_kernels)" do
-    context "prints kernel count" do
-      it "when installed_kernels = 0" do
+    context "when installed_kernels = 0" do
+      it "raises SystemExit" do
         expect(lambda { Messages.print_installed_kernels([]) }).
-          to raise_error "ERROR: No kernels found in the /boot directory!"
+          to raise_error SystemExit
       end
 
-      it "when installed_kernels = 1" do
+      it "prints 'no kernels found error' message" do
+        Kernel.stub!(:exit)
+        Kernels.stub!(:find_all_kernels).and_return([])
+        $stderr.should_receive(:puts).with("ERROR: No kernels found in the /boot directory!")
+        Messages.print_installed_kernels([])
+      end
+    end
+
+    context "when installed_kernels = 1" do
+      it "prints 'only one kernel found' message" do
         output = capture_stout { Messages.print_installed_kernels(@installed_kernels.last(1)) }
 
         expect(output).to match "Only one kernel found!"
       end
+    end
 
-      it "when installed_kernels > 1" do
+    context "when installed_kernels > 1" do
+      it "prints 'multiple kernels found' message" do
         output = capture_stout { Messages.print_installed_kernels(@installed_kernels) }
 
         expect(output).to match "Found #{@installed_kernels.length} kernels installed:"
@@ -73,9 +84,8 @@ describe 'Messages' do
 
   context "#print_purge_packages_failure(exit_code)" do
     it "should print failed purge message" do
-      output = capture_stout { Messages.print_purge_packages_failure("12345") }
-
-      expect(output).to match "ERROR: apt-get purge failed with exit code 12345"
+      $stderr.should_receive(:puts).with("ERROR: apt-get purge failed with exit code 12345")
+      Messages.print_purge_packages_failure("12345")
     end
   end
 

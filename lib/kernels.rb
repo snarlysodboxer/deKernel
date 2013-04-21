@@ -73,7 +73,7 @@ class Kernels
     def confirm_removals(kernels_to_remove, installed_kernels)
       $stdout.puts ""
       if kernels_to_remove.length > 0
-        system "clear"
+        Kernel.system "clear"
         Messages.confirm_kernels_to_be_removed(kernels_to_remove, installed_kernels)
         confirmation = ARGF.first.strip
         unless confirmation == "y" || confirmation == "yes"

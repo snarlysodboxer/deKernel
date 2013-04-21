@@ -1,8 +1,38 @@
 require 'spec_helper'
 
 describe 'Kernels' do
-  context "#find_kernels"
-  context "#ask_which_to_remove"
+  context "#find_kernels" do
+    it "finds all kernels" do
+      Kernels.stub!(:find_all_kernels).and_return(@all_kernels)
+      kernels = Kernels.find_kernels
+      expect(kernels[:all]).to eq @all_kernels
+    end
+
+    it "finds installed kernels" do
+      Kernels.stub!(:find_installed_kernels).and_return(@installed_kernels)
+      kernels = Kernels.find_kernels
+      expect(kernels[:installed]).to eq @installed_kernels
+    end
+  end
+
+  context "#ask_which_to_remove" do
+    it "prints each one and adds to list" do
+      Kernel.stub!(:system).with("clear")
+      Kernels.stub!(:find_installed_kernels).and_return(@installed_kernels)
+      ARGF.stub!(:first).and_return("y")
+
+      Kernels.ask_which_to_remove
+    end
+
+    it "calls 'Messages.print_installed_kernels(installed_kernels)'" do
+      Kernel.stub!(:exit)
+      Kernels.stub!(:find_kernels).and_return({ :all => @all_kernels, :installed => @installed_kernels })
+      Messages.should_receive(:print_installed_kernels).with(@installed_kernels)
+      ARGF.stub!(:first).and_return("y")
+
+      Kernels.ask_which_to_remove
+    end
+  end
 
   context "#purge_packages_from_a_list_of_kernels(kernels_to_remove)" do
     context "when kernels_to_remove.length is 0" do
@@ -27,21 +57,24 @@ describe 'Kernels' do
           output = capture_stout { Kernels.purge_packages_from_a_list_of_kernels(@installed_kernels.first(1)) }
           expect(output).to match "Packages are being uninstalled, please stand by..."
         end
-      end
 
-      it "runs `apt-get -y` command" do
-        Kernel.should_receive(:`).with("sudo apt-get purge -y package1package2")
-        Kernels.stub!(:find_kernel_packages).and_return("package1 package2")
-        Kernels.purge_packages_from_a_list_of_kernels(@installed_kernels.first(1))
+        it "runs `apt-get purge -y` command" do
+          Kernel.should_receive(:`).with("sudo apt-get purge -y package1package2")
+          Kernels.stub!(:find_kernel_packages).and_return("package1 package2")
+          Kernels.purge_packages_from_a_list_of_kernels(@installed_kernels.first(1))
+        end
       end
     end
   end
 
-  # private methods, test them or not?
+
+  ### private methods, test them or not?
+
   #   find_all_kernels
   #   find_installed_kernels(all_kernels)
   #   create_kernels_to_remove_list(installed_kernels)
   #   find_kernel_packages(kernels_to_remove)
+
   context "#confirm_removals(kernels_to_remove, installed_kernels)" do
     context "when kernels_to_remove.length is 0" do
       it "raises SystemExit" do
@@ -52,6 +85,7 @@ describe 'Kernels' do
 
       it "prints 'no kernels selected' message" do
         Kernel.stub!(:exit)
+        Kernel.stub!(:system).with("clear")
         $stderr.should_receive(:puts).with("No kernels selected!")
         Kernels.send(:confirm_removals, @installed_kernels.first(0), @installed_kernels)
       end
