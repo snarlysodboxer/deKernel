@@ -59,7 +59,7 @@ describe 'Kernels' do
         end
 
         it "runs `apt-get purge -y` command" do
-          Kernel.should_receive(:`).with("sudo apt-get purge -y package1 package2")
+          IO.should_receive(:popen).with("sudo apt-get purge -y package1 package2")
           Kernels.stub!(:find_kernel_packages).and_return("package1 package2")
           Kernels.purge_packages_from_a_list_of_kernels(@installed_kernels.first(1))
         end

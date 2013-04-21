@@ -38,7 +38,7 @@ class Messages
 
     def print_purge_packages_failure(exit_code)
       $stdout.puts ""
-      $stderr.puts "ERROR: apt-get purge failed with exit code #{exit_code}"
+      $stderr.puts "ERROR: apt-get purge failed with exit code \"#{exit_code}\""
     end
 
     def confirm_kernels_to_be_removed(kernels_to_remove, installed_kernels)

@@ -84,7 +84,7 @@ describe 'Messages' do
 
   context "#print_purge_packages_failure(exit_code)" do
     it "prints failed purge message" do
-      $stderr.should_receive(:puts).with("ERROR: apt-get purge failed with exit code 12345")
+      $stderr.should_receive(:puts).with("ERROR: apt-get purge failed with exit code \"12345\"")
       Messages.print_purge_packages_failure("12345")
     end
   end
