@@ -8,7 +8,8 @@ class Kernels
 
     def ask_which_to_remove
       installed_kernels = find_kernels[:installed]
-      Messages.print_installed_kernels(installed_kernels)
+      $stdout.puts Messages.installed_kernels(installed_kernels)
+      Kernel.exit if installed_kernels.length == 0
       kernels_to_remove = create_kernels_to_remove_list(installed_kernels)
       confirm_removals(kernels_to_remove, installed_kernels)
     end

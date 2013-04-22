@@ -7,43 +7,31 @@ describe 'Messages' do
     $stderr.stub!(:puts)
     Kernel.stub!(:system).with("clear")
   end
-  context "#print_installed_kernels(installed_kernels)" do
+  context "#installed_kernels(installed_kernels)" do
     context "when installed_kernels = 0" do
-      it "raises SystemExit" do
-        expect(lambda { Messages.print_installed_kernels([]) }).
-          to raise_error SystemExit
-      end
-
-      it "prints 'no kernels found error' message" do
-        Kernel.stub!(:exit)
-        Kernels.stub!(:find_all_kernels)
-        $stderr.should_receive(:puts).with("ERROR: No kernels found in the /boot directory!")
-        Messages.print_installed_kernels([])
+      it "returns 'no kernels found error' message" do
+        expect(Messages.installed_kernels([])).
+          to match "ERROR: No kernels found in the /boot directory!"
       end
     end
 
     context "when installed_kernels = 1" do
-      it "prints 'only one kernel found' message" do
-        output = capture_stdout { Messages.print_installed_kernels(@installed_kernels.last(1)) }
-
-        expect(output).to match "Only one kernel found!"
+      it "returns 'only one kernel found' message" do
+        expect(Messages.installed_kernels(@installed_kernels.last(1))).
+          to match "Only one kernel found!"
       end
     end
 
     context "when installed_kernels > 1" do
-      it "prints 'multiple kernels found' message" do
-        output = capture_stdout { Messages.print_installed_kernels(@installed_kernels) }
-
-        expect(output).to match "Found #{@installed_kernels.length} kernels installed:"
+      it "returns 'multiple kernels found' message" do
+        expect(Messages.installed_kernels(@installed_kernels)).
+          to match "Found #{@installed_kernels.length} kernels installed:"
       end
     end
 
-    it "prints kernels" do
-      output = capture_stdout { Messages.print_installed_kernels(@installed_kernels) }
-
-      @installed_kernels.each do |kernel|
-        expect(output).to match kernel
-      end
+    it "returns kernels as a string" do
+      expect(Messages.installed_kernels(@installed_kernels)).
+        to match "  2.4.28-11  \n  3.2.0-8  \n  3.2.0-11  \n"
     end
   end
 

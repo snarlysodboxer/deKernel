@@ -23,6 +23,12 @@ describe 'Kernels' do
   end
 
   context "#ask_which_to_remove" do
+    it "raises SystemExit if installed_kernels.length == 0" do
+      Kernels.stub!(:find_kernels).and_return({ :installed => [] })
+      expect(lambda { Kernels.ask_which_to_remove }).
+        to raise_error SystemExit
+    end
+
     it "prints each one and adds to list" do
       Kernels.stub!(:find_installed_kernels).and_return(@installed_kernels)
       ARGF.stub!(:first).and_return("y")
@@ -30,10 +36,10 @@ describe 'Kernels' do
       Kernels.ask_which_to_remove
     end
 
-    it "calls 'Messages.print_installed_kernels(installed_kernels)'" do
+    it "calls 'Messages.installed_kernels(installed_kernels)'" do
       Kernel.stub!(:exit)
       Kernels.stub!(:find_kernels).and_return({ :all => @all_kernels, :installed => @installed_kernels })
-      Messages.should_receive(:print_installed_kernels).with(@installed_kernels)
+      Messages.should_receive(:installed_kernels).with(@installed_kernels)
       ARGF.stub!(:first).and_return("y")
 
       Kernels.ask_which_to_remove

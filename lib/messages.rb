@@ -1,8 +1,10 @@
 class Messages
   class << self
-    def print_installed_kernels(installed_kernels)
-      print_kernel_count(installed_kernels)
-      installed_kernels.each { |k| $stdout.puts "  #{k}  " }
+    def installed_kernels(installed_kernels)
+      string = String.new
+      string << "#{kernel_count(installed_kernels)}\n"
+      installed_kernels.each { |k| string << "  #{k}  \n" }
+      string
     end
 
     def print_other_kernels
@@ -57,16 +59,15 @@ class Messages
     end
 
     private
-    def print_kernel_count(installed_kernels)
+    def kernel_count(installed_kernels)
       count = installed_kernels.length
       case
       when count == 0
-        $stderr.puts "ERROR: No kernels found in the /boot directory!"
-        Kernel.exit
+        "ERROR: No kernels found in the /boot directory!"
       when count == 1
-        $stdout.puts "Only one kernel found!"
+        "Only one kernel found!"
       when count >= 2
-        $stdout.puts "Found #{count} kernels installed:"
+        "Found #{count} kernels installed:"
       end
     end
   end
