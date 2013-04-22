@@ -1,6 +1,13 @@
 require 'spec_helper'
 
 describe 'Kernels' do
+  before :each do
+    $stdout.stub!(:puts)
+    $stdout.stub!(:print)
+    $stderr.stub!(:puts)
+    IO.stub!(:popen)
+    Kernel.stub!(:system)
+  end
   context "#find_kernels" do
     it "finds all kernels" do
       Kernels.stub!(:find_all_kernels).and_return(@all_kernels)
@@ -17,7 +24,6 @@ describe 'Kernels' do
 
   context "#ask_which_to_remove" do
     it "prints each one and adds to list" do
-      Kernel.stub!(:system).with("clear")
       Kernels.stub!(:find_installed_kernels).and_return(@installed_kernels)
       ARGF.stub!(:first).and_return("y")
 
@@ -85,7 +91,6 @@ describe 'Kernels' do
 
       it "prints 'no kernels selected' message" do
         Kernel.stub!(:exit)
-        Kernel.stub!(:system).with("clear")
         $stderr.should_receive(:puts).with("No kernels selected!")
         Kernels.send(:confirm_removals, @installed_kernels.first(0), @installed_kernels)
       end

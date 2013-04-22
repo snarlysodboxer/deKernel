@@ -14,13 +14,13 @@ class Messages
         $stdout.puts   "###       If you know you don't want those kernels, you may want to remove them."
         $stdout.puts   "###       You can list and remove them with the following commands:"
         {"list" => "ls -ahl", "remove" => "rm -f  "}.each do |name, command|
-          print "###       `"
+          $stdout.print "###       `"
           other_kernels.each_with_index do |kernel, index|
             index + 1 == other_kernels.length ?
-              print("sudo #{command} /boot/*-#{kernel}*") :
-              print("sudo #{command} /boot/*-#{kernel}* && ")
+              $stdout.print("sudo #{command} /boot/*-#{kernel}*") :
+              $stdout.print("sudo #{command} /boot/*-#{kernel}* && ")
           end
-          print '`'
+          $stdout.print '`'
           $stdout.puts  ""
         end
         $stdout.puts    ""

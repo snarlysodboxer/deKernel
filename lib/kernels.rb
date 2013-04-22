@@ -44,7 +44,7 @@ class Kernels
       kernels_to_remove = Array.new
       installed_kernels.each do |kernel|
         $stdout.flush
-        print "Do you want to remove the #{kernel} kernel [y/N/yes/NO/?]"
+        $stdout.print "Do you want to remove the #{kernel} kernel [y/N/yes/NO/?]"
         arg = ARGF.first.strip
         if arg == "y" or arg == "yes"
           $stdout.puts "Marking #{kernel} for removal"
@@ -63,7 +63,6 @@ class Kernels
       end
       if packages_list == ""
         $stderr.puts "ERROR: No packages to remove."
-        Messages.print_other_kernels
         Kernel.exit
       else
         packages_list
@@ -78,12 +77,10 @@ class Kernels
         confirmation = ARGF.first.strip
         unless confirmation == "y" || confirmation == "yes"
           $stderr.puts "Canceled!"
-          Messages.print_other_kernels
           Kernel.exit
         end
       else
         $stderr.puts "No kernels selected!"
-        Messages.print_other_kernels
         Kernel.exit
       end
       kernels_to_remove

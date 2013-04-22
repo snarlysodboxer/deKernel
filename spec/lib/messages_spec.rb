@@ -1,6 +1,12 @@
 require 'spec_helper'
 
 describe 'Messages' do
+  before :each do
+    $stdout.stub!(:puts)
+    $stdout.stub!(:print)
+    $stderr.stub!(:puts)
+    Kernel.stub!(:system).with("clear")
+  end
   context "#print_installed_kernels(installed_kernels)" do
     context "when installed_kernels = 0" do
       it "raises SystemExit" do
@@ -10,7 +16,7 @@ describe 'Messages' do
 
       it "prints 'no kernels found error' message" do
         Kernel.stub!(:exit)
-        Kernels.stub!(:find_all_kernels).and_return([])
+        Kernels.stub!(:find_all_kernels)
         $stderr.should_receive(:puts).with("ERROR: No kernels found in the /boot directory!")
         Messages.print_installed_kernels([])
       end
