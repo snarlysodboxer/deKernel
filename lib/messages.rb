@@ -44,6 +44,7 @@ class Messages
     def purge_packages_success(kernels_to_remove)
       ["",
        "Successfully removed the kernel packages for: #{kernels_to_remove.join(', ')}",
+       "",
        "### NOTE: Usually apt-get will update your bootloader automatically,",
        "###       but if you have any trouble you may need to update it manually.",
        "###       (i.e. `sudo update-grub2` if you are using grub2)"].join("\n")

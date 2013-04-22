@@ -67,6 +67,7 @@ describe 'Messages' do
     it "returns successful purge message" do
       string = [
         "Successfully removed the kernel packages for: #{@all_kernels.drop(2).join(', ')}",
+        "",
         "### NOTE: Usually apt-get will update your bootloader automatically,",
         "###       but if you have any trouble you may need to update it manually."].join("\n")
       expect(Messages.purge_packages_success(@all_kernels.drop(2))).to match string
