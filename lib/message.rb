@@ -1,4 +1,4 @@
-class Messages
+class Message
   class << self
     def installed_kernels(installed_kernels)
       string = String.new
@@ -8,7 +8,7 @@ class Messages
     end
 
     def other_kernels
-      kernels = Kernels.find_kernels
+      kernels = Cernel.find_kernels
       other_kernels = kernels[:all] - kernels[:installed]
       string = String.new
       if other_kernels.length > 0

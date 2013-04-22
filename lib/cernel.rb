@@ -1,4 +1,4 @@
-class Kernels
+class Cernel
   class << self
     def find_kernels
       all_kernels = find_all_kernels
@@ -8,7 +8,7 @@ class Kernels
 
     def ask_which_to_remove
       installed_kernels = find_kernels[:installed]
-      $stdout.puts Messages.installed_kernels(installed_kernels)
+      $stdout.puts Message.installed_kernels(installed_kernels)
       Kernel.exit if installed_kernels.length == 0
       kernels_to_remove = create_kernels_to_remove_list(installed_kernels)
       confirm_removals(kernels_to_remove, installed_kernels)
@@ -22,7 +22,7 @@ class Kernels
         $? == 0 ? result_and_message = ["success", kernels_to_remove] :
                   result_and_message = ["failure", $?]
         Kernel.system "sudo apt-get clean"
-        $stdout.puts Messages.send("purge_packages_#{result_and_message[0]}", result_and_message[1])
+        $stdout.puts Message.send("purge_packages_#{result_and_message[0]}", result_and_message[1])
       end
     end
 
@@ -77,7 +77,7 @@ class Kernels
     def confirm_removals(kernels_to_remove, installed_kernels)
       if kernels_to_remove.length > 0
         Kernel.system "clear"
-        $stdout.puts Messages.confirm_kernels_to_be_removed(kernels_to_remove, installed_kernels)
+        $stdout.puts Message.confirm_kernels_to_be_removed(kernels_to_remove, installed_kernels)
         confirmation = ARGF.first.strip
         unless confirmation == "y" || confirmation == "yes"
           $stderr.puts "Canceled!"

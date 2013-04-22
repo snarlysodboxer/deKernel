@@ -2,8 +2,8 @@ require 'rubygems'
 require 'rspec'
 
 require 'deKernel'
-require 'kernels'
-require 'messages'
+require 'cernel'
+require 'message'
 
 RSpec.configure do |c|
   c.before :all do
