@@ -38,6 +38,7 @@ describe 'Messages' do
   context "#other_kernels" do
     context "when other_kernels.length is greater than 0" do
       it "returns 'you have other kernels' message" do
+        Kernels.stub!(:find_kernels).and_return({ :all => @all_kernels, :installed => @installed_kernels })
         message = "### NOTE: You have kernels in your /boot directory " +
                   "that have no corresponding packages installed." + "\n"
                   "###       If you know you don't want those kernels, " +
