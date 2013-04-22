@@ -3,7 +3,7 @@ require 'spec_helper'
 describe 'deKernel' do
   before :each do
     $stdout.stub!(:puts)
-    Messages.stub!(:print_other_kernels)
+    Messages.stub!(:other_kernels)
     Kernel.stub!(:system).with("clear")
     Kernels.stub!(:ask_which_to_remove)
     Kernels.stub!(:purge_packages_from_a_list_of_kernels)
@@ -21,8 +21,9 @@ describe 'deKernel' do
     DeKernel.run
   end
 
-  it "calls Messages.print_other_kernels" do
-    Messages.should_receive(:print_other_kernels)
+  it "prints Messages.other_kernels" do
+    $stdout.should_receive(:puts)
+    Messages.should_receive(:other_kernels)
     DeKernel.run
   end
 

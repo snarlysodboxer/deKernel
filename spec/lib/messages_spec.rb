@@ -35,33 +35,30 @@ describe 'Messages' do
     end
   end
 
-  context "#print_other_kernels" do
+  context "#other_kernels" do
     context "when other_kernels.length is greater than 0" do
-      before :each do
-        Kernels.stub!(:find_kernels).
-          and_return({ :all => @all_kernels, :installed => @installed_kernels })
-        @output = capture_stdout { Messages.print_other_kernels }
-      end
-      it "prints 'you have other kernels' message" do
-        ["### NOTE: You have kernels in your /boot directory that have no corresponding packages installed.",
-        "###       If you know you don't want those kernels, you may want to remove them."].each do |message|
-          expect(@output).to match message
-        end
+      it "returns 'you have other kernels' message" do
+        message = "### NOTE: You have kernels in your /boot directory " +
+                  "that have no corresponding packages installed." + "\n"
+                  "###       If you know you don't want those kernels, " +
+                  "you may want to remove them."
+
+        expect(Messages.other_kernels).to match message
       end
 
-      it "prints list and remove commands" do
+      it "returns list and remove commands" do
+        Kernels.stub!(:find_kernels).
+          and_return({ :all => @all_kernels, :installed => @installed_kernels })
+
         [(@all_kernels - @installed_kernels).first, "sudo ls -ahl ", "sudo rm -f "].each do |string|
-          expect(@output).to match string
+          expect(Messages.other_kernels).to match string
         end
       end
     end
     
-    it "prints nothing if other_kernels.length == 0" do
-      Kernels.stub!(:find_kernels).
-        and_return({ :all => @installed_kernels, :installed => @installed_kernels })
-      output = capture_stdout { Messages.print_other_kernels }
-
-      expect(output.to_s).to be_empty
+    it "returns nothing if other_kernels.length == 0" do
+      Kernels.stub!(:find_kernels).and_return({ :all => @all_kernels, :installed => @all_kernels })
+      expect(Messages.other_kernels).to be_empty
     end
   end
 

@@ -7,26 +7,27 @@ class Messages
       string
     end
 
-    def print_other_kernels
+    def other_kernels
       kernels = Kernels.find_kernels
       other_kernels = kernels[:all] - kernels[:installed]
+      string = String.new
       if other_kernels.length > 0
-        $stdout.puts   ""
-        $stdout.puts   "### NOTE: You have kernels in your /boot directory that have no corresponding packages installed."
-        $stdout.puts   "###       If you know you don't want those kernels, you may want to remove them."
-        $stdout.puts   "###       You can list and remove them with the following commands:"
+        string << "\n"
+        string << "### NOTE: You have kernels in your /boot directory that have no corresponding packages installed.\n"
+        string << "###       If you know you don't want those kernels, you may want to remove them.\n"
+        string << "###       You can list and remove them with the following commands:\n"
         {"list" => "ls -ahl", "remove" => "rm -f  "}.each do |name, command|
-          $stdout.print "###       `"
+          string << "###       `"
           other_kernels.each_with_index do |kernel, index|
-            index + 1 == other_kernels.length ?
-              $stdout.print("sudo #{command} /boot/*-#{kernel}*") :
-              $stdout.print("sudo #{command} /boot/*-#{kernel}* && ")
+            index + 1 == other_kernels.length ? (
+              string << "sudo #{command} /boot/*-#{kernel}*" ) : (
+              string << "sudo #{command} /boot/*-#{kernel}* && " )
           end
-          $stdout.print '`'
-          $stdout.puts  ""
+          string << "`\n"
         end
-        $stdout.puts    ""
+        string << "\n"
       end
+      string
     end
 
     def print_purge_packages_success(kernels_to_remove)
