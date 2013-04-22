@@ -11,4 +11,9 @@ deKernel
 4. Follow the directions! It will confirm with you before making any changes.
 
 #### NOTES
-* This script has currently only been tested on Ubuntu systems. I welcome pull requests to make it compatible with other releases.
+* This has currently only been tested on Ubuntu systems. I welcome pull requests to make it compatible with other releases.
+
+* This code essentially automates three commands for you:
+  1. `ls /boot | grep vmlinuz` to find a list of present kernels.
+  2. `dpkg -l | grep ^ii | grep [each present kernel]` to find which have corresponding installed packages.
+  3. `sudo apt-get purge -y [packages list]` to remove those packages.
