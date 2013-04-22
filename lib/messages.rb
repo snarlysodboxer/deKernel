@@ -12,51 +12,57 @@ class Messages
       other_kernels = kernels[:all] - kernels[:installed]
       string = String.new
       if other_kernels.length > 0
-        string << "\n"
-        string << "### NOTE: You have kernels in your /boot directory that have no corresponding packages installed.\n"
-        string << "###       If you know you don't want those kernels, you may want to remove them.\n"
-        string << "###       You can list and remove them with the following commands:\n"
-        {"list" => "ls -ahl", "remove" => "rm -f  "}.each do |name, command|
-          string << "###       `"
-          other_kernels.each_with_index do |kernel, index|
-            index + 1 == other_kernels.length ? (
-              string << "sudo #{command} /boot/*-#{kernel}*" ) : (
-              string << "sudo #{command} /boot/*-#{kernel}* && " )
-          end
-          string << "`\n"
+        list_command = "###       `"
+        other_kernels.each_with_index do |kernel, index|
+          index + 1 == other_kernels.length ? (
+            list_command << "sudo ls -ahl /boot/*-#{kernel}*" ) : (
+            list_command << "sudo ls -ahl /boot/*-#{kernel}* && " )
         end
-        string << "\n"
+        list_command << "`"
+        remove_command = "###       `"
+        other_kernels.each_with_index do |kernel, index|
+          index + 1 == other_kernels.length ? (
+            remove_command << "sudo rm -f   /boot/*-#{kernel}*" ) : (
+            remove_command << "sudo rm -f   /boot/*-#{kernel}* && " )
+        end
+        remove_command << "`"
+        # ^^^ the above obviously needs refactored
+        string = [
+          "",
+          "### NOTE: You have kernels in your /boot directory " +
+          "that have no corresponding packages installed.",
+          "###       If you know you don't want those kernels, " +
+          "you may want to remove them.",
+          "###       You can list and remove them with the following commands:",
+          list_command,
+          remove_command,
+          "", ""].join("\n")
       end
       string
     end
 
-    def print_purge_packages_success(kernels_to_remove)
-      $stdout.puts ""
-      $stdout.puts "Successfully removed the kernel packages for: #{kernels_to_remove.join(', ')}"
-      $stdout.puts ""
-      $stdout.puts "### NOTE: Usually apt-get will update your bootloader automatically,"
-      $stdout.puts "###       but if you have any trouble you may need to update it manually."
-      $stdout.puts "###       (i.e. `sudo update-grub2` if you are using grub2)"
-      $stdout.puts ""
+    def purge_packages_success(kernels_to_remove)
+      ["",
+       "Successfully removed the kernel packages for: #{kernels_to_remove.join(', ')}",
+       "### NOTE: Usually apt-get will update your bootloader automatically,",
+       "###       but if you have any trouble you may need to update it manually.",
+       "###       (i.e. `sudo update-grub2` if you are using grub2)"].join("\n")
     end
 
-    def print_purge_packages_failure(exit_code)
-      $stdout.puts ""
-      $stderr.puts "ERROR: apt-get purge failed with \"#{exit_code}\""
+    def purge_packages_failure(exit_code)
+      ["", "ERROR: apt-get purge failed with \"#{exit_code}\""].join("\n")
     end
 
     def confirm_kernels_to_be_removed(kernels_to_remove, installed_kernels)
-      kernels_to_remove.length > 1 ?
-        $stdout.puts("The #{kernels_to_remove.length} kernels marked with asterisks will be apt-get purged:") :
-        $stdout.puts("The kernel marked with asterisks will be apt-get purged:")
+      string = String.new
+      kernels_to_remove.length > 1 ? (
+        string << "The #{kernels_to_remove.length} kernels marked with asterisks will be apt-get purged:\n") : (
+        string << "The kernel marked with asterisks will be apt-get purged:\n")
       installed_kernels.each do |kernel|
-        kernels_to_remove.include?(kernel) ? ($stdout.puts "**#{kernel}**") : ($stdout.puts "  #{kernel}  ")
+        kernels_to_remove.include?(kernel) ? (string << "**#{kernel}**\n") : (string << "  #{kernel}  \n")
       end
-      $stdout.puts "Are you sure you want to continue [y/N/yes/NO/?]"
-    end
-
-    def get_free_disk_space
-      Kernel.send(:`, "df -BM /boot").split[10].to_i
+      string << "Are you sure you want to continue [y/N/yes/NO/?]"
+      string
     end
 
     private

@@ -79,6 +79,15 @@ describe 'Kernels' do
     end
   end
 
+  context "#get_free_disk_space" do
+    it "gets available disk space" do
+      Kernel.should_receive(:`).with("df -BM /boot").
+        and_return("Filesystem     1M-blocks  Used Available Use% Mounted on\n/dev/sdc3         46935M 9115M    35437M  21% /\n")
+
+      Kernels.get_free_disk_space
+    end
+  end
+
 
   ### private methods, test them or not?
 

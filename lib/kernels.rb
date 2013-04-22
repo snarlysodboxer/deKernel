@@ -22,8 +22,12 @@ class Kernels
         $? == 0 ? result_and_message = ["success", kernels_to_remove] :
                   result_and_message = ["failure", $?]
         Kernel.system "sudo apt-get clean"
-        Messages.send("print_purge_packages_#{result_and_message[0]}", result_and_message[1])
+        $stdout.puts Messages.send("purge_packages_#{result_and_message[0]}", result_and_message[1])
       end
+    end
+
+    def get_free_disk_space
+      Kernel.send(:`, "df -BM /boot").split[10].to_i
     end
 
     private
@@ -71,10 +75,9 @@ class Kernels
     end
 
     def confirm_removals(kernels_to_remove, installed_kernels)
-      $stdout.puts ""
       if kernels_to_remove.length > 0
         Kernel.system "clear"
-        Messages.confirm_kernels_to_be_removed(kernels_to_remove, installed_kernels)
+        $stdout.puts Messages.confirm_kernels_to_be_removed(kernels_to_remove, installed_kernels)
         confirmation = ARGF.first.strip
         unless confirmation == "y" || confirmation == "yes"
           $stderr.puts "Canceled!"
