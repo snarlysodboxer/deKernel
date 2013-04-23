@@ -16,17 +16,15 @@ class Cernel
 
     def purge_packages_from_a_list_of_kernels(kernels_to_remove)
       packages_list = find_kernel_packages(kernels_to_remove)
-      if packages_list.empty?
-        $stderr.puts "ERROR: No packages to remove."
-        Kernel.exit
-      else
-        $stdout.puts "Packages are being uninstalled, please stand by..."
-        IO.send(:popen, "sudo apt-get purge -y #{packages_list.split.join("\s")}") { |p| p.each { |f| $stdout.puts f } }
-        $? == 0 ? ( result_and_message = ["success", kernels_to_remove]
-                    Kernel.system "sudo apt-get clean" ) :
-                  ( result_and_message = ["failure", $?] )
+      packages_list.empty? ?
+        ( $stderr.puts "ERROR: No packages to remove." ; Kernel.exit ) :
+        ( $stdout.puts "Packages are being uninstalled, please stand by..."
+          #IO.send(:popen, "sudo apt-get purge #{packages_list.join("\s")}") { |p| p.each { |f| $stdout.puts f } }
+          IO.send(:popen, "sudo apt-get purge #{packages_list.join("")}") { |p| p.each { |f| $stdout.puts f } } )
+        $? == 0 ?
+          ( result_and_message = ["success", kernels_to_remove] ; Kernel.system "sudo apt-get clean" ) :
+          ( result_and_message = ["failure", $?] )
         $stdout.puts Message.send("purge_packages_#{result_and_message[0]}", result_and_message[1])
-      end
     end
 
     def get_free_disk_space
@@ -46,17 +44,11 @@ class Cernel
     end
 
     def create_kernels_to_remove_list(installed_kernels)
-      kernels_to_remove = Array.new
-      installed_kernels.each do |kernel|
-        $stdout.flush
+      installed_kernels.select do |kernel|
         $stdout.print "Do you want to remove the #{kernel} kernel [y/N/yes/NO/?]"
-        arg = ARGF.first.strip
-        if arg == "y" or arg == "yes"
-          $stdout.puts "Marking #{kernel} for removal"
-          kernels_to_remove << kernel
-        end
+        !!ARGF.first.strip.match(/^y$|^yes$/i) ?
+          ( $stdout.puts "Marking #{kernel} for removal" ; true ) : ( false )
       end
-      kernels_to_remove
     end
 
     def find_kernel_packages(kernels_to_remove)
@@ -65,18 +57,11 @@ class Cernel
     end
 
     def confirm_removals(kernels_to_remove, installed_kernels)
-      if kernels_to_remove.length > 0
-        Kernel.system "clear"
-        $stdout.puts Message.confirm_kernels_to_be_removed(kernels_to_remove, installed_kernels)
-        confirmation = ARGF.first.strip
-        unless confirmation == "y" || confirmation == "yes"
-          $stderr.puts "Canceled!"
-          Kernel.exit
-        end
-      else
-        $stderr.puts "No kernels selected!"
-        Kernel.exit
-      end
+      kernels_to_remove.length > 0 ?
+        ( Kernel.system "clear"
+          $stdout.puts Message.confirm_kernels_to_be_removed(kernels_to_remove, installed_kernels)
+          ($stderr.puts "Canceled!" ; Kernel.exit) unless ARGF.first.strip.match(/^y$|^yes$/i) ) :
+        ( $stderr.puts "No kernels selected!" ; Kernel.exit )
       kernels_to_remove
     end
   end

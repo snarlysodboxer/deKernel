@@ -25,15 +25,14 @@ describe 'Cernel' do
   context "#ask_which_to_remove" do
     it "raises SystemExit if installed_kernels.length == 0" do
       Cernel.stub!(:find_kernels).and_return({ :installed => [] })
-      expect(lambda { Cernel.ask_which_to_remove }).
-        to raise_error SystemExit
+      expect(lambda { Cernel.ask_which_to_remove }).to raise_error SystemExit
     end
 
     it "prints each one and adds to list" do
       Cernel.stub!(:find_installed_kernels).and_return(@installed_kernels)
-      ARGF.stub!(:first).and_return("y")
+      ARGF.stub!(:first).and_return("y", "n", "y")
 
-      Cernel.ask_which_to_remove
+      expect(Cernel.ask_which_to_remove.to_s).to match(/#{@remove_kernels.to_s}/)
     end
 
     it "calls 'Message.installed_kernels(installed_kernels)'" do
@@ -64,7 +63,7 @@ describe 'Cernel' do
     context "when kernels_to_remove.length is > 0" do
       context "when packages found" do
         it "prints 'packages being uninstalled' message" do
-          Cernel.stub!(:find_kernel_packages).and_return("package1 package2")
+          Cernel.stub!(:find_kernel_packages).and_return(["package1", "package2"])
           #$stdout.should_receive(:puts).with("Packages are being uninstalled, please stand by...") ## couldn't get this work, why?
           output = capture_stdout { Cernel.purge_packages_from_a_list_of_kernels(@installed_kernels.first(1)) }
           expect(output).to match "Packages are being uninstalled, please stand by..."
@@ -72,7 +71,7 @@ describe 'Cernel' do
 
         it "runs `apt-get purge -y` command" do
           IO.should_receive(:popen).with("sudo apt-get purge -y package1 package2")
-          Cernel.stub!(:find_kernel_packages).and_return("package1 package2")
+          Cernel.stub!(:find_kernel_packages).and_return(["package1", "package2"])
           Cernel.purge_packages_from_a_list_of_kernels(@installed_kernels.first(1))
         end
       end
@@ -132,7 +131,17 @@ describe 'Cernel' do
     end
   end
 
-  #   create_kernels_to_remove_list(installed_kernels)
+  context "#create_kernels_to_remove_list(installed_kernels)" do
+    it "returns an array" do
+      ARGF.should_receive(:first).exactly(@installed_kernels.length).times.and_return('yes')
+      expect(Cernel.send(:create_kernels_to_remove_list, @installed_kernels)).to be_a_kind_of(Array)
+    end
+    
+    it "returns only the kernels selected" do
+      ARGF.should_receive(:first).exactly(@installed_kernels.length).times.and_return('yes', 'no', 'no')
+      expect(Cernel.send(:create_kernels_to_remove_list, @installed_kernels)).to eq @installed_kernels.first(1)
+    end
+  end
 
   context "#find_kernel_packages(kernels_to_remove)" do
     it "returns an array" do
@@ -160,6 +169,7 @@ describe 'Cernel' do
   context "#confirm_removals(kernels_to_remove, installed_kernels)" do
     context "when kernels_to_remove.length is 0" do
       it "raises SystemExit" do
+
         expect(lambda do
           Cernel.send(:confirm_removals, @installed_kernels.first(0), @installed_kernels)
         end).to raise_error SystemExit
@@ -167,8 +177,37 @@ describe 'Cernel' do
 
       it "prints 'no kernels selected' message" do
         Kernel.stub!(:exit)
+
         $stderr.should_receive(:puts).with("No kernels selected!")
         Cernel.send(:confirm_removals, @installed_kernels.first(0), @installed_kernels)
+      end
+    end
+
+    context "when kernels_to_remove.length is > 0" do
+      before :each do
+        ARGF.should_receive(:first).exactly(1).times.and_return('no')
+      end
+
+      context "when confirmation not met" do
+        it "raises system exit" do
+
+          expect(lambda do
+            Cernel.send(:confirm_removals, @remove_kernels, @installed_kernels)
+          end).to raise_error SystemExit
+        end
+
+        it "prints 'canceled' message" do
+          Kernel.stub!(:exit)
+
+          $stderr.should_receive(:puts).with("Canceled!")
+          Cernel.send(:confirm_removals, @remove_kernels, @installed_kernels)
+        end
+      end
+      
+      it "returns kernels_to_remove" do
+        Kernel.stub!(:exit)
+
+        expect(Cernel.send(:confirm_removals, @remove_kernels, @installed_kernels)).to eq @remove_kernels
       end
     end
   end
