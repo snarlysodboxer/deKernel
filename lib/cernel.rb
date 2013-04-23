@@ -3,7 +3,7 @@ class Cernel
     def find_kernels
       all_kernels = find_all_kernels
       installed_kernels = find_installed_kernels(all_kernels)
-      { :all => all_kernels, :installed => installed_kernels }
+      { all: all_kernels, installed: installed_kernels }
     end
 
     def ask_which_to_remove

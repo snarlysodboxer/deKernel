@@ -1,44 +1,27 @@
 class Message
   class << self
+    ## Every method in this class returns a String
+
     def installed_kernels(installed_kernels)
-      string = String.new
-      string << "#{kernel_count(installed_kernels)}\n"
-      installed_kernels.each { |k| string << "  #{k}  \n" }
-      string
+      [kernel_count(installed_kernels),
+      (installed_kernels.collect { |k| "  #{k}  " })].flatten.join("\n")
     end
 
     def other_kernels
       kernels = Cernel.find_kernels
       other_kernels = kernels[:all] - kernels[:installed]
-      string = String.new
       if other_kernels.length > 0
-        list_command = "###       `"
-        other_kernels.each_with_index do |kernel, index|
-          index + 1 == other_kernels.length ? (
-            list_command << "sudo ls -ahl /boot/*-#{kernel}*" ) : (
-            list_command << "sudo ls -ahl /boot/*-#{kernel}* && " )
-        end
-        list_command << "`"
-        remove_command = "###       `"
-        other_kernels.each_with_index do |kernel, index|
-          index + 1 == other_kernels.length ? (
-            remove_command << "sudo rm -f   /boot/*-#{kernel}*" ) : (
-            remove_command << "sudo rm -f   /boot/*-#{kernel}* && " )
-        end
-        remove_command << "`"
-        # ^^^ the above obviously needs refactored
-        string = [
-          "",
-          "### NOTE: You have kernels in your /boot directory " +
-          "that have no corresponding packages installed.",
-          "###       If you know you don't want those kernels, " +
-          "you may want to remove them.",
-          "###       You can list and remove them with the following commands:",
-          list_command,
-          remove_command,
-          "", ""].join("\n")
+        ["",
+         "### NOTE: You have kernels in your /boot directory " +
+         "that have no corresponding packages installed.",
+         "###       If you know you don't want those kernels, " +
+         "you may want to remove them.",
+         "###       You can list and remove them with the following commands:",
+         list_and_remove_commands(other_kernels),
+         "", ""].join("\n")
+      else
+        String.new
       end
-      string
     end
 
     def purge_packages_success(kernels_to_remove)
@@ -66,6 +49,19 @@ class Message
     end
 
     private
+    { "list" => "ls -ahl", "remove" => "rm -f  " }.each do |name, command|
+      define_method "#{name}_command" do |other_kernels|
+        other_kernels.each_with_index.collect { |kernel, index|
+          index + 1 == other_kernels.length ?
+            ( "sudo #{command} /boot/*-#{kernel}*" ) :
+            ( "sudo #{command} /boot/*-#{kernel}* && " ) }.unshift("###       `").push("`").join
+      end
+    end
+
+    def list_and_remove_commands(other_kernels)
+      [list_command(other_kernels), remove_command(other_kernels)].join("\n")
+    end
+
     def kernel_count(installed_kernels)
       count = installed_kernels.length
       case

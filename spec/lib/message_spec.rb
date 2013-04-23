@@ -25,7 +25,8 @@ describe 'Message' do
 
     it "returns kernels as a string" do
       expect(Message.installed_kernels(@installed_kernels)).
-        to match "  2.4.28-11  \n  3.2.0-8  \n  3.2.0-11  \n"
+        to match ["Found #{@installed_kernels.length} kernels installed:"].
+          concat(@installed_kernels.collect { |k| "  #{k}  " }).join("\n")
     end
   end
 
@@ -92,6 +93,12 @@ describe 'Message' do
       "Are you sure you want to continue "].each do |string|
         expect(output).to match string
       end
+    end
+  end
+
+  it "responds to list_command and remove_command" do
+    ["list", "remove"].each do |name|
+      expect(Message).to respond_to("#{name}_command")
     end
   end
 end
