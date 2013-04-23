@@ -45,7 +45,7 @@ describe 'Message' do
         Cernel.stub!(:find_kernels).
           and_return({ :all => @all_kernels, :installed => @installed_kernels })
 
-        [(@all_kernels - @installed_kernels).first, "sudo ls -ahl ", "sudo rm -f "].each do |string|
+        [@other_kernels.first, "sudo ls -ahl ", "sudo rm -f "].each do |string|
           expect(Message.other_kernels).to match string
         end
       end

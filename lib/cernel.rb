@@ -16,12 +16,15 @@ class Cernel
 
     def purge_packages_from_a_list_of_kernels(kernels_to_remove)
       packages_list = find_kernel_packages(kernels_to_remove)
-      unless packages_list.nil?
+      if packages_list.empty?
+        $stderr.puts "ERROR: No packages to remove."
+        Kernel.exit
+      else
         $stdout.puts "Packages are being uninstalled, please stand by..."
         IO.send(:popen, "sudo apt-get purge -y #{packages_list.split.join("\s")}") { |p| p.each { |f| $stdout.puts f } }
-        $? == 0 ? result_and_message = ["success", kernels_to_remove] :
-                  result_and_message = ["failure", $?]
-        Kernel.system "sudo apt-get clean"
+        $? == 0 ? ( result_and_message = ["success", kernels_to_remove]
+                    Kernel.system "sudo apt-get clean" ) :
+                  ( result_and_message = ["failure", $?] )
         $stdout.puts Message.send("purge_packages_#{result_and_message[0]}", result_and_message[1])
       end
     end
@@ -32,17 +35,14 @@ class Cernel
 
     private
     def find_all_kernels
-      all_kernels = Array.new
-      `ls /boot | grep vmlinuz | cut -d'-' -f2,3`.each_line { |l| all_kernels << l.strip }
-      all_kernels
+      Kernel.send(:`, "ls /boot").each_line.grep(/vmlinuz/).collect { |l|
+        l.match(/[0-9]\.[0-9]{1,2}\.[0-9]{1,2}-[0-9]{1,2}/).to_s }
     end
 
     def find_installed_kernels(all_kernels)
-      installed_kernels = all_kernels.select do |kernel|
-        `dpkg -l | grep ^ii | grep "#{kernel}"`
-        $? == 0 ? true : false
+      all_kernels.select do |kernel|
+        Kernel.send(:system, "dpkg-query -f '${Package}\n' -W *#{kernel}* >/dev/null 2>&1")
       end
-      installed_kernels
     end
 
     def create_kernels_to_remove_list(installed_kernels)
@@ -60,18 +60,8 @@ class Cernel
     end
 
     def find_kernel_packages(kernels_to_remove)
-      packages_list = String.new
-      kernels_to_remove.each do |kernel|
-        $stdout.flush
-        $stdout.puts kernel
-        packages_list += `dpkg -l | grep ^ii | grep "#{kernel}" | cut -d' ' -f3`
-      end
-      if packages_list == ""
-        $stderr.puts "ERROR: No packages to remove."
-        Kernel.exit
-      else
-        packages_list
-      end
+      kernels_to_remove.map { |kernel|
+        Kernel.send(:`, "dpkg-query -f '${Package}\n' -W *#{kernel}*").split("\n") }.flatten
     end
 
     def confirm_removals(kernels_to_remove, installed_kernels)

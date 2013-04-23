@@ -91,10 +91,71 @@ describe 'Cernel' do
 
   ### private methods, test them or not?
 
-  #   find_all_kernels
-  #   find_installed_kernels(all_kernels)
+  context "#find_all_kernels" do
+    before :each do
+      Kernel.should_receive(:`).with("ls /boot").
+        and_return("vmlinuz-2.28.10-38-generic\nvmlinuz-3.2.0-39-generic\nvmlinuz-3.2.0-40-generic\n")
+    end
+
+    it "returns an array" do
+      expect(Cernel.send(:find_all_kernels)).to be_a_kind_of(Array)
+    end
+
+    it "returns greped kernel numbers" do
+      expect(Cernel.send(:find_all_kernels)).to eq ["2.28.10-38", "3.2.0-39", "3.2.0-40"]
+    end
+  end
+
+  context "#find_installed_kernels(all_kernels)" do
+    it "returns an array" do
+      expect(Cernel.send(:find_installed_kernels, @all_kernels)).to be_a_kind_of(Array)
+    end
+
+    it "calls dpkg command for each kernel" do
+      @all_kernels.each do |kernel|
+        Kernel.stub!(:`).with("dpkg-query -f '${Package}\n' -W *#{kernel}* >/dev/null 2>&1")
+        Kernel.should_receive(:system).with("dpkg-query -f '${Package}\n' -W *#{kernel}* >/dev/null 2>&1").
+          and_return("linux-headers-#{kernel}\nlinux-headers-#{kernel}-generic\nlinux-image-#{kernel}-generic\n")
+      end
+      Cernel.send(:find_installed_kernels, @all_kernels)
+    end
+
+    it "returns only kernels that have installed packages" do
+      { "true" => @installed_kernels, "false" => @other_kernels }.each do |value, kernels|
+        kernels.each do |kernel|
+          Kernel.stub!(:system).
+            with("dpkg-query -f '${Package}\n' -W *#{kernel}* >/dev/null 2>&1").
+              and_return(!!value.match(/true/))
+        end
+      end
+      expect(Cernel.send(:find_installed_kernels, @all_kernels)).to eq @installed_kernels
+    end
+  end
+
   #   create_kernels_to_remove_list(installed_kernels)
-  #   find_kernel_packages(kernels_to_remove)
+
+  context "#find_kernel_packages(kernels_to_remove)" do
+    it "returns an array" do
+      expect(Cernel.send(:find_kernel_packages, @installed_kernels.drop(2))).to be_a_kind_of(Array)
+    end
+
+    it "returns only packages from the kernels_to_remove" do
+      remove_packages = Array.new
+      @remove_kernels.each do |kernel|
+        packages = ["linux-headers-#{kernel}", "linux-headers-#{kernel}-generic", "linux-image-#{kernel}-generic"]
+        Kernel.should_receive(:`).with("dpkg-query -f '${Package}\n' -W *#{kernel}*").
+          and_return(packages.join("\n"))
+        packages.each do |package|
+          remove_packages << package
+        end
+      end
+      (@all_kernels - @remove_kernels).each do |kernel|
+        Kernel.should_not_receive(:system).with("dpkg-query -f '${Package}\n' -W *#{kernel}*")
+      end
+
+      expect(Cernel.send(:find_kernel_packages, @remove_kernels)).to eq remove_packages
+    end
+  end
 
   context "#confirm_removals(kernels_to_remove, installed_kernels)" do
     context "when kernels_to_remove.length is 0" do
