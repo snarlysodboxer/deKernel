@@ -19,8 +19,7 @@ class Cernel
       packages_list.empty? ?
         ( $stderr.puts "ERROR: No packages to remove." ; Kernel.exit ) :
         ( $stdout.puts "Packages are being uninstalled, please stand by..."
-          #IO.send(:popen, "sudo apt-get purge #{packages_list.join("\s")}") { |p| p.each { |f| $stdout.puts f } }
-          IO.send(:popen, "sudo apt-get purge #{packages_list.join("")}") { |p| p.each { |f| $stdout.puts f } } )
+          IO.send(:popen, "sudo apt-get purge #{packages_list.join("\s")}") { |p| p.each { |f| $stdout.puts f } } )
         $? == 0 ?
           ( result_and_message = ["success", kernels_to_remove] ; Kernel.system "sudo apt-get clean" ) :
           ( result_and_message = ["failure", $?] )
@@ -61,7 +60,7 @@ class Cernel
         ( Kernel.system "clear"
           $stdout.puts Message.confirm_kernels_to_be_removed(kernels_to_remove, installed_kernels)
           ($stderr.puts "Canceled!" ; Kernel.exit) unless ARGF.first.strip.match(/^y$|^yes$/i) ) :
-        ( $stderr.puts "No kernels selected!" ; Kernel.exit )
+        ( $stderr.puts ; $stderr.puts "No kernels selected!" ; Kernel.exit )
       kernels_to_remove
     end
   end

@@ -64,13 +64,12 @@ describe 'Cernel' do
       context "when packages found" do
         it "prints 'packages being uninstalled' message" do
           Cernel.stub!(:find_kernel_packages).and_return(["package1", "package2"])
-          #$stdout.should_receive(:puts).with("Packages are being uninstalled, please stand by...") ## couldn't get this work, why?
-          output = capture_stdout { Cernel.purge_packages_from_a_list_of_kernels(@installed_kernels.first(1)) }
-          expect(output).to match "Packages are being uninstalled, please stand by..."
+          $stdout.should_receive(:puts).with("Packages are being uninstalled, please stand by...")
+          Cernel.purge_packages_from_a_list_of_kernels(@installed_kernels.first(1))
         end
 
-        it "runs `apt-get purge -y` command" do
-          IO.should_receive(:popen).with("sudo apt-get purge -y package1 package2")
+        it "runs `apt-get purge` command" do
+          IO.should_receive(:popen).with("sudo apt-get purge package1 package2")
           Cernel.stub!(:find_kernel_packages).and_return(["package1", "package2"])
           Cernel.purge_packages_from_a_list_of_kernels(@installed_kernels.first(1))
         end
@@ -144,32 +143,30 @@ describe 'Cernel' do
   end
 
   context "#find_kernel_packages(kernels_to_remove)" do
-    it "returns an array" do
-      expect(Cernel.send(:find_kernel_packages, @installed_kernels.drop(2))).to be_a_kind_of(Array)
-    end
-
-    it "returns only packages from the kernels_to_remove" do
-      remove_packages = Array.new
+    before :each do
       @remove_kernels.each do |kernel|
-        packages = ["linux-headers-#{kernel}", "linux-headers-#{kernel}-generic", "linux-image-#{kernel}-generic"]
-        Kernel.should_receive(:`).with("dpkg-query -f '${Package}\n' -W *#{kernel}*").
-          and_return(packages.join("\n"))
-        packages.each do |package|
-          remove_packages << package
-        end
+        Kernel.should_receive(:`).exactly(1).times.with("dpkg-query -f '${Package}\n' -W *#{kernel}*").
+          and_return(@remove_packages.join("\n"))
       end
       (@all_kernels - @remove_kernels).each do |kernel|
         Kernel.should_not_receive(:system).with("dpkg-query -f '${Package}\n' -W *#{kernel}*")
       end
+    end
 
-      expect(Cernel.send(:find_kernel_packages, @remove_kernels)).to eq remove_packages
+    it "returns an array" do
+      expect(Cernel.send(:find_kernel_packages, @remove_kernels)).to be_a_kind_of(Array)
+    end
+
+    it "returns only packages from the kernels_to_remove" do
+      # why do i have to use 'uniq' right here? without 'uniq' it returns a doubled array.
+      #expect(Cernel.send(:find_kernel_packages, @remove_kernels)).to eq @remove_packages
+      expect(Cernel.send(:find_kernel_packages, @remove_kernels).uniq).to eq @remove_packages
     end
   end
 
   context "#confirm_removals(kernels_to_remove, installed_kernels)" do
     context "when kernels_to_remove.length is 0" do
       it "raises SystemExit" do
-
         expect(lambda do
           Cernel.send(:confirm_removals, @installed_kernels.first(0), @installed_kernels)
         end).to raise_error SystemExit
@@ -177,8 +174,8 @@ describe 'Cernel' do
 
       it "prints 'no kernels selected' message" do
         Kernel.stub!(:exit)
-
         $stderr.should_receive(:puts).with("No kernels selected!")
+
         Cernel.send(:confirm_removals, @installed_kernels.first(0), @installed_kernels)
       end
     end
@@ -190,7 +187,6 @@ describe 'Cernel' do
 
       context "when confirmation not met" do
         it "raises system exit" do
-
           expect(lambda do
             Cernel.send(:confirm_removals, @remove_kernels, @installed_kernels)
           end).to raise_error SystemExit

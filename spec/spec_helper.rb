@@ -11,16 +11,23 @@ RSpec.configure do |c|
     @installed_kernels = @all_kernels.drop(1)
     @other_kernels = @all_kernels - @installed_kernels
     @remove_kernels = @installed_kernels.drop(1)
-  end
 
-  def capture_stdout(&block)
-    original_stdout = $stdout
-    $stdout = fake = StringIO.new
-    begin
-      yield
-    ensure
-      $stdout = original_stdout
+    @all_packages = Array.new
+    @installed_kernels.each do |kernel|
+      ["linux-headers-#{kernel}",
+       "linux-headers-#{kernel}-generic",
+       "linux-image-#{kernel}-generic"].each do |package|
+         @all_packages << package
+      end
     end
-    fake.string
+
+    @remove_packages = Array.new
+    @remove_kernels.each do |kernel|
+      ["linux-headers-#{kernel}",
+       "linux-headers-#{kernel}-generic",
+       "linux-image-#{kernel}-generic"].each do |package|
+         @remove_packages << package
+      end
+    end
   end
 end

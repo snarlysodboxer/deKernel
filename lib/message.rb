@@ -63,7 +63,6 @@ class Message
         kernels_to_remove.include?(kernel) ? (string << "**#{kernel}**\n") : (string << "  #{kernel}  \n")
       end
       string << "Are you sure you want to continue [y/N/yes/NO/?]"
-      string
     end
 
     private
