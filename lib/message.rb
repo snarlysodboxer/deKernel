@@ -22,17 +22,17 @@ class Message
         ( String.new )
     end
 
-    def purge_packages_success(kernels_to_remove)
-      ["",
-       "Successfully removed the kernel packages for: #{kernels_to_remove.join(', ')}",
-       "",
-       "### NOTE: Usually apt-get will update your bootloader automatically,",
-       "###       but if you have any trouble you may need to update it manually.",
-       "###       (i.e. `sudo update-grub2` if you are using grub2)"].join("\n")
-    end
-
-    def purge_packages_failure(exit_code)
-      ["", "ERROR: apt-get purge failed with \"#{exit_code}\""].join("\n")
+    [:success, :failure].each do |boolean|
+      define_method "purge_packages_#{boolean}" do |message|
+        boolean == :success ?
+        ( ["",
+           "Successfully removed the kernel packages for: #{message.join(', ')}",
+           "",
+           "### NOTE: Usually apt-get will update your bootloader automatically,",
+           "###       but if you have any trouble you may need to update it manually.",
+           "###       (i.e. `sudo update-grub2` if you are using grub2)"].join("\n") ) :
+        ( ["", "ERROR: apt-get purge failed with \"#{message}\""].join("\n") )
+      end
     end
 
     def confirm_kernels_to_be_removed(kernels_to_remove, installed_kernels)

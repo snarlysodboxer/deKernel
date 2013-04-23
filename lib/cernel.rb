@@ -19,6 +19,8 @@ class Cernel
       packages_list.empty? ?
         ( $stderr.puts "ERROR: No packages to remove." ; Kernel.exit ) :
         ( $stdout.puts "Packages are being uninstalled, please stand by..."
+          ## important line to disable actual uninstall for manual testing
+          #IO.send(:popen, "sudo apt-get purge #{packages_list.join("")}") { |p| p.each { |f| $stdout.puts f } } )
           IO.send(:popen, "sudo apt-get purge #{packages_list.join("\s")}") { |p| p.each { |f| $stdout.puts f } } )
         $? == 0 ?
           ( result_and_message = ["success", kernels_to_remove] ; Kernel.system "sudo apt-get clean" ) :

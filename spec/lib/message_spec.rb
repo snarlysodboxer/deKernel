@@ -96,7 +96,13 @@ describe 'Message' do
     end
   end
 
-  it "responds to list_command and remove_command" do
+  it "responds to purge_packages_success and purge_packages_failure methods" do
+    ["success", "failure"].each do |boolean|
+      expect(Message).to respond_to("purge_packages_#{boolean}")
+    end
+  end
+
+  it "responds to list_command and remove_command methods" do
     ["list", "remove"].each do |name|
       expect(Message).to respond_to("#{name}_command")
     end
