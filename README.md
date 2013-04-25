@@ -2,12 +2,12 @@ deKernel
 ========
 
 ## A simple Command Line Tool to help with removing old/unused kernels.
-*(Especially when they have built up over time and are waisting disk space.)*
+*(Especially when they have built up over time and are wasting disk space.)*
 
 #### Instructions
 1. `git clone git@github.com:snarlysodboxer/deKernel.git`
 2. `cd deKernel`
-3. `./deKernelScript` or `./deKernelScript --dry-run` (to tell apt-get to only pretend to make changes.)
+3. `./deKernelScript` (or `./deKernelScript --dry-run` to tell apt-get to only pretend to make changes.)
 4. Follow the directions! It will confirm with you before making any changes.
 
 #### NOTES
