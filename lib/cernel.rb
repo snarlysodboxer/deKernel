@@ -17,7 +17,6 @@ class Cernel
     def purge_packages_from_a_list_of_kernels(kernels_to_remove)
       packages_list = find_kernel_packages(kernels_to_remove)
       if $options[:dry_run] == true
-        $stdout.puts "\n" + "      THIS IS A DRY-RUN!, apt-get will only pretend." + "\n" + "\n"
         IO.send(:popen, "sudo apt-get purge --dry-run #{packages_list.join("\s")} 1>&2") { |p| p.each { |f| $stdout.puts f } }
       else
         IO.send(:popen, "sudo apt-get purge #{packages_list.join("\s")} 1>&2") { |p| p.each { |f| $stdout.puts f } }
