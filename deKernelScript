@@ -7,4 +7,10 @@ require 'deKernel'
 require 'cernel'
 require 'message'
 
+require 'optparse'
+$options = { dry_run: false }
+OptionParser.new { |opts|
+  opts.on('--dry-run') { |v| $options[:dry_run] = true }
+}.parse!
+
 DeKernel.run

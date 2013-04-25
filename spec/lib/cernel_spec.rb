@@ -63,7 +63,8 @@ describe 'Cernel' do
     context "when kernels_to_remove.length is > 0" do
       context "when packages found" do
         it "prints 'packages being uninstalled' message" do
-          Cernel.stub!(:find_kernel_packages).and_return(["package1", "package2"])
+          Kernel.stub!(:`).with("dpkg-query -f '${Package}\n' -W *#{@installed_kernels.first}*").
+            and_return("package1 package2")
           $stdout.should_receive(:puts).with("Packages are being uninstalled, please stand by...")
           Cernel.purge_packages_from_a_list_of_kernels(@installed_kernels.first(1))
         end
@@ -174,7 +175,7 @@ describe 'Cernel' do
 
       it "prints 'no kernels selected' message" do
         Kernel.stub!(:exit)
-        $stderr.should_receive(:puts).with("No kernels selected!")
+        $stderr.should_receive(:puts).with("\nNo kernels selected!")
 
         Cernel.send(:confirm_removals, @installed_kernels.first(0), @installed_kernels)
       end

@@ -76,17 +76,16 @@ describe 'Message' do
     end
   end
 
-  context "#confirm_kernels_to_be_removed(kernels_to_remove, installed_kernels)" do
+  context "#ask_to_confirm_kernels_to_remove(kernels_to_remove, installed_kernels)" do
     it "returns 'multiple kernels message' when multiple kernels" do
-      output = Message.confirm_kernels_to_be_removed(@installed_kernels.drop(1),
-                                                      @installed_kernels)
+      output = Message.ask_to_confirm_kernels_to_remove(@installed_kernels.drop(1), @installed_kernels)
+      count = @installed_kernels.drop(1).length
 
-      expect(output).to match "The #{@installed_kernels.drop(1).length
-                                     } kernels marked with asterisks will be apt-get purged:"
+      expect(output).to match "The #{count} kernels marked with asterisks will be apt-get purged:"
     end
 
     it "returns 'singular kernel message' when only one kernel" do
-      output = Message.confirm_kernels_to_be_removed(@installed_kernels.first(1),
+      output = Message.ask_to_confirm_kernels_to_remove(@installed_kernels.first(1),
                                                       @installed_kernels)
 
       ["The kernel marked with asterisks will be apt-get purged:",
