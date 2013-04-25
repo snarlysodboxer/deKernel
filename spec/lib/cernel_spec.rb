@@ -70,7 +70,7 @@ describe 'Cernel' do
         end
 
         it "runs `apt-get purge` command" do
-          IO.should_receive(:popen).with("sudo apt-get purge package1 package2")
+          IO.should_receive(:popen).with("sudo apt-get purge package1 package2 1>&2")
           Cernel.stub!(:find_kernel_packages).and_return(["package1", "package2"])
           Cernel.purge_packages_from_a_list_of_kernels(@installed_kernels.first(1))
         end

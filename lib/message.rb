@@ -4,7 +4,7 @@ class Message
 
     def installed_kernels(installed_kernels)
       [kernel_count(installed_kernels),
-      (installed_kernels.collect { |k| "  #{k}  " })].flatten.join("\n")
+      (installed_kernels.collect { |k| "  #{k}  " })].flatten.push("", "").join("\n")
     end
 
     def other_kernels
