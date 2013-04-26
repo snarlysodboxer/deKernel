@@ -11,7 +11,7 @@ describe 'deKernel' do
 
   it "prints 'generally recommended' message" do
     $stdout.should_receive(:puts).
-      with("It's generally recommended to leave at least three of your latest kernels installed.")
+      with("It's generally recommended to leave at least three of your latest kernels installed.\n\n")
     DeKernel.run
   end
 
