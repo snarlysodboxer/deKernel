@@ -5,7 +5,6 @@ describe 'Cernel' do
     $stdout.stub!(:puts)
     $stdout.stub!(:print)
     $stderr.stub!(:puts)
-    IO.stub!(:popen)
     Kernel.stub!(:system)
   end
   context "#find_kernels" do
@@ -46,6 +45,19 @@ describe 'Cernel' do
   end
 
   context "#purge_packages_from_a_list_of_kernels(kernels_to_remove)" do
+    before :each do
+      IO.stub!(:popen)
+      Message.stub!(:purge_packages_success)
+      Message.stub!(:purge_packages_failure)
+    end
+
+    it "calls confirm_removals" do
+      Cernel.stub!(:find_kernel_packages).and_return(@remove_packages)
+      Cernel.should_receive(:confirm_removals).with(@kernels_to_remove)
+
+      Cernel.purge_packages_from_a_list_of_kernels(@kernels_to_remove)
+    end
+
     context "when kernels_to_remove.length is 0" do
       it "raises SystemExit" do
         expect(lambda do

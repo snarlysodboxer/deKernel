@@ -22,7 +22,7 @@ OptionParser.new { |opts|
     $options[:kernels_list] = v
   end
   opts.on('-x', '--all-except', 'Remove all except the lastest (n) kernels', '=MANDATORY', Integer)   do |v|
-    $options[:all_except] = v.to_s
+    $options[:all_except] = v.to_i
   end
 }.parse!
 
