@@ -33,7 +33,7 @@ describe 'Message' do
   context "#other_kernels" do
     context "when other_kernels.length is greater than 0" do
       it "returns 'you have other kernels' message" do
-        Cernel.stub!(:find_kernels).and_return({ :all => @all_kernels, :installed => @installed_kernels })
+        Cernel.stub!(:find_kernels).and_return(@kernels_hash)
         message = "### NOTE: You have kernels in your /boot directory " +
                   "that have no corresponding packages installed." + "\n"
                   "###       If you know you don't want those kernels, " +
@@ -44,7 +44,7 @@ describe 'Message' do
 
       it "returns list and remove commands" do
         Cernel.stub!(:find_kernels).
-          and_return({ :all => @all_kernels, :installed => @installed_kernels })
+          and_return(@kernels_hash)
 
         [@other_kernels.first, "sudo ls -ahl ", "sudo rm -f "].each do |string|
           expect(Message.other_kernels).to match string

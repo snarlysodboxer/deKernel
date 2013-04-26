@@ -36,10 +36,7 @@ class Cernel
 
     def find_all_except_latest(number)
       kernels = find_kernels
-      installed_kernels = zero_pad_for_sort(kernels[:installed])
-      installed_kernels = installed_kernels.sort.reverse
-      installed_kernels.shift($options[:all_except])
-      installed_kernels 
+      sort_properly(kernels[:installed]).rotate(-number).drop(number)
     end
 
     private
@@ -86,12 +83,10 @@ class Cernel
       end ; kernels_to_remove
     end
 
-    def zero_pad_for_sort(kernels)
-      kernels.each { |kernel_string|
-        if !!kernel_string.match(/-[0-9]$/)
-          number = kernel_string[-1]
-          kernel_string.sub!(/-#{number}$/, "-0#{number}")
-        end
+    def sort_properly(kernels)
+      kernels.sort_by { |kernel_string|
+        split = kernel_string.split(/-/)
+        [split[0], "%02d" % split[1]].join('-')
       }
     end
   end

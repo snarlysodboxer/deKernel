@@ -37,7 +37,7 @@ describe 'Cernel' do
 
     it "calls 'Message.installed_kernels(installed_kernels)'" do
       Kernel.stub!(:exit)
-      Cernel.stub!(:find_kernels).and_return({ :all => @all_kernels, :installed => @installed_kernels })
+      Cernel.stub!(:find_kernels).and_return(@kernels_hash)
       Message.should_receive(:installed_kernels).with(@installed_kernels)
       ARGF.stub!(:first).and_return("y")
 
@@ -93,7 +93,8 @@ describe 'Cernel' do
 
   context "#find_all_except_latest(number)" do
     it "should find all except latest (number) kernels" do
-      expect(Cernel.send(:find_all_except_latest, "1")).to eq @all_except_latest_one
+      Cernel.stub!(:find_kernels).and_return(@kernels_hash)
+      expect(Cernel.send(:find_all_except_latest, 1)).to eq @all_except_latest_one
     end
   end
 
@@ -177,8 +178,7 @@ describe 'Cernel' do
 
   context "#confirm_removals(kernels_to_remove, installed_kernels)" do
     before :each do
-      Cernel.stub!(:find_kernels).
-        and_return({ :all => @all_kernels, :installed => @installed_kernels })
+      Cernel.stub!(:find_kernels).and_return(@kernels_hash)
     end
 
     context "when kernels_to_remove.length is 0" do
@@ -221,6 +221,15 @@ describe 'Cernel' do
 
         expect(Cernel.send(:confirm_removals, @remove_kernels)).to eq @remove_kernels
       end
+    end
+  end
+
+  context "#sort_properly(kernels)" do
+    it "pads dash-number" do
+      unsorted  = ["2.23.10-1", "3.2.0-8", "2.23.1-4", "3.2.0-11", "2.3.1-10", "2.23.1-34"]
+      sorted    = ["2.23.1-4", "2.23.1-34", "2.23.10-1", "2.3.1-10", "3.2.0-8", "3.2.0-11"]
+
+      expect(Cernel.send(:sort_properly, unsorted)).to eq sorted
     end
   end
 end
