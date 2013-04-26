@@ -11,15 +11,16 @@ class Cernel
       $stdout.puts Message.installed_kernels(installed_kernels)
       Kernel.exit if installed_kernels.length == 0
       kernels_to_remove = create_kernels_to_remove_list(installed_kernels)
-      confirm_removals(kernels_to_remove, installed_kernels)
     end
 
     def purge_packages_from_a_list_of_kernels(kernels_to_remove)
+      confirm_removals(kernels_to_remove)
       packages_list = find_kernel_packages(kernels_to_remove)
       if $options[:dry_run] == true
         IO.send(:popen, "sudo apt-get purge --dry-run #{packages_list.join("\s")} 1>&2") { |p| p.each { |f| $stdout.puts f } }
       else
-        IO.send(:popen, "sudo apt-get purge #{packages_list.join("\s")} 1>&2") { |p| p.each { |f| $stdout.puts f } }
+        #IO.send(:popen, "sudo apt-get purge #{packages_list.join("\s")} 1>&2") { |p| p.each { |f| $stdout.puts f } }
+        IO.send(:popen, "sudo apt-get purge #{packages_list.join("")} 1>&2") { |p| p.each { |f| $stdout.puts f } }
       end
       if $? != 0
         $stdout.puts Message.purge_packages_failure($?)
@@ -31,6 +32,14 @@ class Cernel
 
     def get_free_disk_space
       Kernel.send(:`, "df -BM /boot").split[10].to_i
+    end
+
+    def find_all_except_latest(number)
+      kernels = find_kernels
+      installed_kernels = zero_pad_for_sort(kernels[:installed])
+      installed_kernels = installed_kernels.sort.reverse
+      installed_kernels.shift($options[:all_except])
+      installed_kernels 
     end
 
     private
@@ -65,14 +74,25 @@ class Cernel
       end ; packages
     end
 
-    def confirm_removals(kernels_to_remove, installed_kernels)
+    def confirm_removals(kernels_to_remove)
       unless kernels_to_remove.length > 0
         $stderr.puts "\n" + "No kernels selected!" ; Kernel.exit
       else
+        all_kernels = find_kernels
+        installed_kernels = all_kernels[:installed]
         Kernel.system "clear"
         $stdout.puts Message.ask_to_confirm_kernels_to_remove(kernels_to_remove, installed_kernels)
         ($stderr.puts "Canceled!" ; Kernel.exit) unless !!ARGF.first.strip.match(/^y$|^yes$/i)
       end ; kernels_to_remove
+    end
+
+    def zero_pad_for_sort(kernels)
+      kernels.each { |kernel_string|
+        if !!kernel_string.match(/-[0-9]$/)
+          number = kernel_string[-1]
+          kernel_string.sub!(/-#{number}$/, "-0#{number}")
+        end
+      }
     end
   end
 end

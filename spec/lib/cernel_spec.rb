@@ -24,7 +24,7 @@ describe 'Cernel' do
 
   context "#ask_which_to_remove" do
     it "raises SystemExit if installed_kernels.length == 0" do
-      Cernel.stub!(:find_kernels).and_return({ :installed => [] })
+      Cernel.stub!(:find_kernels).and_return({ installed: [] })
       expect(lambda { Cernel.ask_which_to_remove }).to raise_error SystemExit
     end
 
@@ -62,6 +62,10 @@ describe 'Cernel' do
 
     context "when kernels_to_remove.length is > 0" do
       context "when packages found" do
+        before :each do
+          Cernel.stub!(:confirm_removals).and_return(@remove_kernels)
+        end
+
         it "prints 'packages being uninstalled' message" do
           Kernel.stub!(:`).with("dpkg-query -f '${Package}\n' -W *#{@installed_kernels.first}*").
             and_return("package1 package2")
@@ -84,6 +88,12 @@ describe 'Cernel' do
         and_return("Filesystem     1M-blocks  Used Available Use% Mounted on\n/dev/sdc3         46935M 9115M    35437M  21% /\n")
 
       Cernel.get_free_disk_space
+    end
+  end
+
+  context "#find_all_except_latest(number)" do
+    it "should find all except latest (number) kernels" do
+      expect(Cernel.send(:find_all_except_latest, "1")).to eq @all_except_latest_one
     end
   end
 
@@ -166,10 +176,15 @@ describe 'Cernel' do
   end
 
   context "#confirm_removals(kernels_to_remove, installed_kernels)" do
+    before :each do
+      Cernel.stub!(:find_kernels).
+        and_return({ :all => @all_kernels, :installed => @installed_kernels })
+    end
+
     context "when kernels_to_remove.length is 0" do
       it "raises SystemExit" do
         expect(lambda do
-          Cernel.send(:confirm_removals, @installed_kernels.first(0), @installed_kernels)
+          Cernel.send(:confirm_removals, @installed_kernels.first(0))
         end).to raise_error SystemExit
       end
 
@@ -177,7 +192,7 @@ describe 'Cernel' do
         Kernel.stub!(:exit)
         $stderr.should_receive(:puts).with("\nNo kernels selected!")
 
-        Cernel.send(:confirm_removals, @installed_kernels.first(0), @installed_kernels)
+        Cernel.send(:confirm_removals, @installed_kernels.first(0))
       end
     end
 
@@ -189,7 +204,7 @@ describe 'Cernel' do
       context "when confirmation not met" do
         it "raises system exit" do
           expect(lambda do
-            Cernel.send(:confirm_removals, @remove_kernels, @installed_kernels)
+            Cernel.send(:confirm_removals, @remove_kernels)
           end).to raise_error SystemExit
         end
 
@@ -197,14 +212,14 @@ describe 'Cernel' do
           Kernel.stub!(:exit)
 
           $stderr.should_receive(:puts).with("Canceled!")
-          Cernel.send(:confirm_removals, @remove_kernels, @installed_kernels)
+          Cernel.send(:confirm_removals, @remove_kernels)
         end
       end
       
       it "returns kernels_to_remove" do
         Kernel.stub!(:exit)
 
-        expect(Cernel.send(:confirm_removals, @remove_kernels, @installed_kernels)).to eq @remove_kernels
+        expect(Cernel.send(:confirm_removals, @remove_kernels)).to eq @remove_kernels
       end
     end
   end

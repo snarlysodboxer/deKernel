@@ -10,6 +10,7 @@ RSpec.configure do |c|
     $options = { dry_run: false }
 
     @all_kernels = ["2.3.56-1", "2.4.28-11", "3.2.0-8", "3.2.0-11"]
+    @all_except_latest_one = @all_kernels.delete("3.2.0.11")
     @installed_kernels = @all_kernels.drop(1)
     @other_kernels = @all_kernels - @installed_kernels
     @remove_kernels = @installed_kernels.drop(1)
