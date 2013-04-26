@@ -51,11 +51,19 @@ describe 'Cernel' do
       Message.stub!(:purge_packages_failure)
     end
 
-    it "calls confirm_removals" do
+    it "calls confirm_removals with $options[:no_confirm] = false (default)" do
       Cernel.stub!(:find_kernel_packages).and_return(@remove_packages)
-      Cernel.should_receive(:confirm_removals).with(@kernels_to_remove)
+      Cernel.should_receive(:confirm_removals).with(@remove_kernels)
 
-      Cernel.purge_packages_from_a_list_of_kernels(@kernels_to_remove)
+      Cernel.purge_packages_from_a_list_of_kernels(@remove_kernels)
+    end
+
+    it "does not call confirm_removals with $options[:no_confirm] = true" do
+      $options[:no_confirm] = true
+      Cernel.stub!(:find_kernel_packages).and_return(@remove_packages)
+      Cernel.should_not_receive(:confirm_removals).with(@remove_kernels)
+
+      Cernel.purge_packages_from_a_list_of_kernels(@remove_kernels)
     end
 
     context "when kernels_to_remove.length is 0" do
@@ -65,11 +73,19 @@ describe 'Cernel' do
         end).to raise_error SystemExit
       end
 
-      it "prints 'no packages error' message" do
+      it "prints 'no kernels selected' message" do
         Kernel.stub!(:exit)
-        $stderr.should_receive(:puts).with("ERROR: No packages to remove.")
+        $stderr.should_receive(:puts).with("\nNo kernels selected!")
+
         Cernel.purge_packages_from_a_list_of_kernels([])
       end
+    end
+
+
+    it "prints 'no packages error' message" do
+      Kernel.stub!(:exit)
+      $stderr.should_receive(:puts).with("ERROR: No packages to remove.")
+      Cernel.purge_packages_from_a_list_of_kernels([])
     end
 
     context "when kernels_to_remove.length is > 0" do
@@ -85,8 +101,8 @@ describe 'Cernel' do
           Cernel.purge_packages_from_a_list_of_kernels(@installed_kernels.first(1))
         end
 
-        it "runs `apt-get purge` command" do
-          IO.should_receive(:popen).with("sudo apt-get purge package1 package2 1>&2")
+        it "runs `apt-get purge` command with no options" do
+          IO.should_receive(:popen).with("sudo apt-get purge  package1 package2 1>&2")
           Cernel.stub!(:find_kernel_packages).and_return(["package1", "package2"])
           Cernel.purge_packages_from_a_list_of_kernels(@installed_kernels.first(1))
         end
@@ -191,41 +207,21 @@ describe 'Cernel' do
   context "#confirm_removals(kernels_to_remove, installed_kernels)" do
     before :each do
       Cernel.stub!(:find_kernels).and_return(@kernels_hash)
+      ARGF.should_receive(:first).exactly(1).times.and_return('no')
     end
 
-    context "when kernels_to_remove.length is 0" do
-      it "raises SystemExit" do
+    context "when confirmation not met" do
+      it "raises system exit" do
         expect(lambda do
-          Cernel.send(:confirm_removals, @installed_kernels.first(0))
+          Cernel.send(:confirm_removals, @remove_kernels)
         end).to raise_error SystemExit
       end
 
-      it "prints 'no kernels selected' message" do
+      it "prints 'canceled' message" do
         Kernel.stub!(:exit)
-        $stderr.should_receive(:puts).with("\nNo kernels selected!")
 
-        Cernel.send(:confirm_removals, @installed_kernels.first(0))
-      end
-    end
-
-    context "when kernels_to_remove.length is > 0" do
-      before :each do
-        ARGF.should_receive(:first).exactly(1).times.and_return('no')
-      end
-
-      context "when confirmation not met" do
-        it "raises system exit" do
-          expect(lambda do
-            Cernel.send(:confirm_removals, @remove_kernels)
-          end).to raise_error SystemExit
-        end
-
-        it "prints 'canceled' message" do
-          Kernel.stub!(:exit)
-
-          $stderr.should_receive(:puts).with("Canceled!")
-          Cernel.send(:confirm_removals, @remove_kernels)
-        end
+        $stderr.should_receive(:puts).with("Canceled!")
+        Cernel.send(:confirm_removals, @remove_kernels)
       end
       
       it "returns kernels_to_remove" do
@@ -242,6 +238,26 @@ describe 'Cernel' do
       sorted    = ["2.23.1-4", "2.23.1-34", "2.23.10-1", "2.3.1-10", "3.2.0-8", "3.2.0-11"]
 
       expect(Cernel.send(:sort_properly, unsorted)).to eq sorted
+    end
+  end
+
+  context "#apt_options" do
+    it "returns a string of the options" do
+      $options[:assume_yes] = false
+      $options[:dry_run] =    false
+      expect(Cernel.send(:apt_options)).to eq ""
+
+      $options[:assume_yes] = true
+      $options[:dry_run] =    false
+      expect(Cernel.send(:apt_options)).to eq "-y"
+
+      $options[:assume_yes] = false
+      $options[:dry_run] =    true
+      expect(Cernel.send(:apt_options)).to eq "-s"
+
+      $options[:assume_yes] = true
+      $options[:dry_run] =    true
+      expect(Cernel.send(:apt_options)).to eq "-y -s"
     end
   end
 end

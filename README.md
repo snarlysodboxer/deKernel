@@ -4,11 +4,18 @@ deKernel
 ## A simple Command Line Tool to help with removing old/unused kernels.
 *(Especially when they have built up over time and are wasting disk space.)*
 
-#### Instructions
+#### Simple Instructions
 1. `git clone git@github.com:snarlysodboxer/deKernel.git`
 2. `cd deKernel`
 3. `./deKernelScript` (or `./deKernelScript --dry-run` to tell apt-get to only pretend to make changes.)
 4. Follow the directions! It will confirm with you before making any changes.
+
+#### Options
+`-s`, `--dry-run`           Pass the '--dry-run' option to apt-get.  This option can be used in combination with any of the other commands.
+`-y`, `--assume-yes`        Pass the --assume-yes option to apt-get. This option can be used in combination with any of the other commands.
+`-n`, `--no-confirm`        Skip the "Are you sure?" step. Useful for scripting. *Use this with caution.* This option can be used in combination with any of the other commands.
+`-x`, `--all-except NUMBER` Pass the number of latest kernels to *leave installed*, the rest are marked for removal.
+`-k`, `--kernels-list LIST` Pass a quoted, space separated list of kernel numbers to be removed. I.E. `--kernels-list '3.2.0-8 3.2.0-11'`. This option is ignored if you pass the `--all-except` option.
 
 #### NOTES
 * This has currently only been tested on Ubuntu systems. I welcome pull requests to make it compatible with other releases.

@@ -8,7 +8,8 @@ require 'cernel'
 require 'message'
 
 require 'optparse'
-$options = { dry_run: false, assume_yes: false, kernels_list: nil, all_except: nil }
+$options = { dry_run: false, assume_yes: false, kernels_list: nil,
+             all_except: nil, no_confirm: false }
 OptionParser.new { |opts|
   opts.banner = "Usage: ./deKernelScript [--dry-run, --assume-yes, --kernels-list=[space separated kernel #'s]"
 
@@ -18,11 +19,14 @@ OptionParser.new { |opts|
   opts.on('-y', '--assume-yes',   'Assume yes with apt-get')  do
     $options[:assume_yes] = true
   end
-  opts.on('-k', '--kernels-list', 'Kernels to remove list', '=MANDATORY')   do |v|
-    $options[:kernels_list] = v
+  opts.on('-n', '--no-confirm',   "Do not confirm with 'Are you sure?' message")  do
+    $options[:no_confirm] = true
   end
   opts.on('-x', '--all-except', 'Remove all except the lastest (n) kernels', '=MANDATORY', Integer)   do |v|
     $options[:all_except] = v.to_i
+  end
+  opts.on('-k', '--kernels-list', 'Kernels to remove list', '=MANDATORY')   do |v|
+    $options[:kernels_list] = v
   end
 }.parse!
 

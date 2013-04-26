@@ -14,14 +14,10 @@ class Cernel
     end
 
     def purge_packages_from_a_list_of_kernels(kernels_to_remove)
-      confirm_removals(kernels_to_remove)
+      ($stderr.puts "\n" + "No kernels selected!" ; Kernel.exit) unless kernels_to_remove.length > 0
+      confirm_removals(kernels_to_remove) unless $options[:no_confirm]
       packages_list = find_kernel_packages(kernels_to_remove)
-      if $options[:dry_run] == true
-        IO.send(:popen, "sudo apt-get purge --dry-run #{packages_list.join("\s")} 1>&2") { |p| p.each { |f| $stdout.puts f } }
-      else
-        #IO.send(:popen, "sudo apt-get purge #{packages_list.join("\s")} 1>&2") { |p| p.each { |f| $stdout.puts f } }
-        IO.send(:popen, "sudo apt-get purge #{packages_list.join("")} 1>&2") { |p| p.each { |f| $stdout.puts f } }
-      end
+      IO.send(:popen, "sudo apt-get purge #{apt_options} #{packages_list.join("\s")} 1>&2") { |p| p.each { |f| $stdout.puts f } }
       if $? != 0
         $stdout.puts Message.purge_packages_failure($?)
       else
@@ -38,6 +34,7 @@ class Cernel
       kernels = find_kernels
       sort_properly(kernels[:installed]).rotate(-number).drop(number)
     end
+
 
     private
     def find_all_kernels
@@ -72,15 +69,12 @@ class Cernel
     end
 
     def confirm_removals(kernels_to_remove)
-      unless kernels_to_remove.length > 0
-        $stderr.puts "\n" + "No kernels selected!" ; Kernel.exit
-      else
-        all_kernels = find_kernels
-        installed_kernels = all_kernels[:installed]
-        Kernel.system "clear"
-        $stdout.puts Message.ask_to_confirm_kernels_to_remove(kernels_to_remove, installed_kernels)
-        ($stderr.puts "Canceled!" ; Kernel.exit) unless !!ARGF.first.strip.match(/^y$|^yes$/i)
-      end ; kernels_to_remove
+      all_kernels = find_kernels
+      installed_kernels = all_kernels[:installed]
+      Kernel.system "clear"
+      $stdout.puts Message.ask_to_confirm_kernels_to_remove(kernels_to_remove, installed_kernels)
+      ($stderr.puts "Canceled!" ; Kernel.exit) unless !!ARGF.first.strip.match(/^y$|^yes$/i)
+      kernels_to_remove
     end
 
     def sort_properly(kernels)
@@ -88,6 +82,12 @@ class Cernel
         split = kernel_string.split(/-/)
         [split[0], "%02d" % split[1]].join('-')
       }
+    end
+
+    def apt_options
+      { y: $options[:assume_yes], s: $options[:dry_run] }.collect { |k, v|
+        if v == true ; "-#{k}" ; end
+      }.join(' ').strip
     end
   end
 end
