@@ -272,4 +272,12 @@ describe 'Cernel' do
       expect(Cernel.send(:apt_options)).to eq "-y -s"
     end
   end
+
+  context "#safe_ified_kernels_list" do
+    it "removes entries with letters" do
+      $options[:kernels_list] = "3.2.r-12 3.2.0-11 3.324.43-32 343 3.2.0-123"
+
+      expect(Cernel.send("safe_ified_kernels_list")).to eq ["3.2.0-11"]
+    end
+  end
 end

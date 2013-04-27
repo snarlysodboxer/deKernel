@@ -35,12 +35,22 @@ class Cernel
       sort_properly(kernels[:installed]).rotate(-number).drop(number)
     end
 
+    def safe_ified_kernels_list
+      options = $options[:kernels_list].split(" ").reject { |kernel| kernel =~ (/[a-z]/i) }
+      options = options.reject { |kernel| kernel =~ (/[0-9]{3,}/i) }
+      options.select { |kernel| kernel =~ kernel_regex }
+    end
+
 
     private
     def find_all_kernels
       Kernel.send(:`, "ls /boot").each_line.grep(/vmlinuz/).collect { |l|
-        l.match(/[0-9]\.[0-9]{1,2}\.[0-9]{1,2}-[0-9]{1,2}/).to_s
+        l.match(kernel_regex).to_s
       }
+    end
+
+    def kernel_regex
+      /[0-9]\.[0-9]{1,2}\.[0-9]{1,2}-[0-9]{1,2}/
     end
 
     def find_installed_kernels(all_kernels)

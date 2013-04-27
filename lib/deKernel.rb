@@ -9,7 +9,7 @@ class DeKernel
     if $options[:all_except] != nil
       Cernel.purge_packages_from_a_list_of_kernels(Cernel.find_all_except_latest($options[:all_except]))
     elsif $options[:kernels_list] != nil
-      Cernel.purge_packages_from_a_list_of_kernels($options[:kernels_list].split(" "))
+      Cernel.purge_packages_from_a_list_of_kernels(Cernel.safe_ified_kernels_list)
     else
       Cernel.purge_packages_from_a_list_of_kernels(Cernel.ask_which_to_remove)
     end
