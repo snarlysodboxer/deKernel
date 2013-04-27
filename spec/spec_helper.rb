@@ -1,9 +1,9 @@
 require 'rubygems'
 require 'rspec'
 
-require 'deKernel'
-require 'cernel'
-require 'message'
+require 'dekernel'
+require 'dekernel/cernel'
+require 'dekernel/message'
 
 RSpec.configure do |c|
   c.before :all do
@@ -22,6 +22,7 @@ RSpec.configure do |c|
        "linux-headers-#{kernel}-generic",
        "linux-image-#{kernel}-generic"]
     }.flatten
+
   end
 end
 

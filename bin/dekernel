@@ -3,10 +3,6 @@
 libdir = "#{File.expand_path(File.dirname(__FILE__))}/lib"
 $LOAD_PATH.unshift(libdir) unless $LOAD_PATH.include?(libdir)
 
-require 'deKernel'
-require 'cernel'
-require 'message'
-
 require 'optparse'
 $options = { dry_run: false, assume_yes: false, kernels_list: nil,
              all_except: nil, no_confirm: false }
@@ -30,5 +26,6 @@ OptionParser.new { |opts|
   end
 }.parse!
 
-DeKernel.run
+require 'lib/dekernel'
 
+DeKernel.run

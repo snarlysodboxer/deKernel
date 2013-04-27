@@ -1,6 +1,6 @@
 class Message
   class << self
-    ## Every method in this class returns a String
+    ## Every method in this class returns a String object
 
     def installed_kernels(installed_kernels)
       [kernel_count(installed_kernels),
