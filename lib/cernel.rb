@@ -18,11 +18,11 @@ class Cernel
       confirm_removals(kernels_to_remove) unless $options[:no_confirm]
       packages_list = find_kernel_packages(kernels_to_remove)
       IO.send(:popen, "sudo apt-get purge #{apt_options} #{packages_list.join("\s")} 1>&2") { |p| p.each { |f| $stdout.puts f } }
-      if $? != 0
+      if $?.exitstatus != 0
         $stdout.puts Message.purge_packages_failure($?)
       else
         $stdout.puts Message.purge_packages_success(kernels_to_remove)
-        Kernel.system "sudo apt-get clean"
+        Kernel.system "sudo apt-get clean" unless $options[:dry_run]
       end
     end
 

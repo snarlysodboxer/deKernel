@@ -98,12 +98,24 @@ describe 'Cernel' do
           Kernel.stub!(:`).with("dpkg-query -f '${Package}\n' -W *#{@installed_kernels.first}*").
             and_return("package1 package2")
           $stdout.should_receive(:puts).with("Packages are being uninstalled, please stand by...")
+
           Cernel.purge_packages_from_a_list_of_kernels(@installed_kernels.first(1))
         end
 
         it "runs `apt-get purge` command with no options" do
           IO.should_receive(:popen).with("sudo apt-get purge  package1 package2 1>&2")
           Cernel.stub!(:find_kernel_packages).and_return(["package1", "package2"])
+
+          Cernel.purge_packages_from_a_list_of_kernels(@installed_kernels.first(1))
+        end
+
+        it "does not run 'apt-get clean' command if $options[:dry_run] == true" do
+          $options[:dry_run] = true
+          $?.stub!(:exitstatus).and_return(0)
+          IO.should_receive(:popen).with("sudo apt-get purge -s package1 package2 1>&2")
+          Cernel.stub!(:find_kernel_packages).and_return(["package1", "package2"])
+          Kernel.should_not_receive(:system).with("sudo apt-get clean")
+
           Cernel.purge_packages_from_a_list_of_kernels(@installed_kernels.first(1))
         end
       end
