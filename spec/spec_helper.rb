@@ -24,3 +24,4 @@ RSpec.configure do |c|
     }.flatten
   end
 end
+

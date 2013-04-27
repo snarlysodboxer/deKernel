@@ -31,3 +31,4 @@ OptionParser.new { |opts|
 }.parse!
 
 DeKernel.run
+

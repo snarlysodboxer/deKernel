@@ -29,3 +29,4 @@ deKernel
   1. We `ls /boot` to gather a list of present `vmlinuz` kernels.
   2. We use `dpkg-query -f '${Package}\n' -W *[pass in each present kernel]*` to find which installed packages belong to those present kernels.
   3. We use `sudo apt-get purge [packages list]` to remove those packages.
+
