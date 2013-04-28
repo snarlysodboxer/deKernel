@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'dekernel'
-  s.version     = '0.0.0.pre'
+  s.version     = '0.0.0'
   s.date        = '2013-04-27'
   s.summary     = 'Remove old/unused kernel packages.'
   s.description = 'A simple tool to help with removing old/unused kernel packages using apt-get.'

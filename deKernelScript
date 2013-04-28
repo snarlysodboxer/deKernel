@@ -26,6 +26,6 @@ OptionParser.new { |opts|
   end
 }.parse!
 
-require 'lib/dekernel'
+require 'dekernel'
 
 DeKernel.run
