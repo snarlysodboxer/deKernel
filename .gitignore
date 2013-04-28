@@ -4,3 +4,4 @@
 /bin/ldiff
 .bundle/
 *.swp
+/.vagrant/
