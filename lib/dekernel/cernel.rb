@@ -3,7 +3,7 @@ class Cernel
     def find_kernels
       all_kernels = find_all_kernels
       installed_kernels = find_installed_kernels(all_kernels)
-      { all: all_kernels, installed: installed_kernels }
+      { :all => all_kernels, :installed => installed_kernels }
     end
 
     def ask_which_to_remove
@@ -17,7 +17,8 @@ class Cernel
       ($stderr.puts "\n" + "No kernels selected!" ; Kernel.exit) unless kernels_to_remove.length > 0
       confirm_removals(kernels_to_remove) unless $options[:no_confirm]
       packages_list = find_kernel_packages(kernels_to_remove)
-      IO.send(:popen, "sudo apt-get purge #{apt_options} #{packages_list.join("\s")} 1>&2") { |p| p.each { |f| $stdout.puts f } }
+      #IO.send(:popen, "sudo apt-get purge #{apt_options} #{packages_list.join("\s")} 1>&2") { |p| p.each { |f| $stdout.puts f } }
+      IO.send(:popen, "sudo apt-get purge #{apt_options} #{packages_list.join("")} 1>&2") { |p| p.each { |f| $stdout.puts f } }
       if $?.exitstatus != 0
         $stdout.puts Message.purge_packages_failure($?)
       else
@@ -32,7 +33,8 @@ class Cernel
 
     def find_all_except_latest(number)
       kernels = find_kernels
-      sort_properly(kernels[:installed]).rotate(-number).drop(number)
+      installed_kernels = kernels[:installed]
+      sort_properly(installed_kernels).take(installed_kernels.length - number)
     end
 
     def safe_ified_kernels_list
@@ -95,8 +97,8 @@ class Cernel
     end
 
     def apt_options
-      { y: $options[:assume_yes], s: $options[:dry_run] }.collect { |k, v|
-        if v == true ; "-#{k}" ; end
+      { :y => $options[:assume_yes], :s => $options[:dry_run] }.collect { |k, v|
+        if v ; "-#{k}" ; end
       }.join(' ').strip
     end
   end

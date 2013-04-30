@@ -1,8 +1,14 @@
 #!/usr/bin/env ruby
 
+lib_dir = "#{File.expand_path(File.dirname(__FILE__))}/../lib"
+$LOAD_PATH.unshift(lib_dir) unless $LOAD_PATH.include?(lib_dir)
+lib_dekernel_dir = "#{File.expand_path(File.dirname(__FILE__))}/../lib/dekernel"
+$LOAD_PATH.unshift(lib_dekernel_dir) unless $LOAD_PATH.include?(lib_dekernel_dir)
+puts $LOAD_PATH
+
 require 'optparse'
-$options = { dry_run: false, assume_yes: false, kernels_list: nil,
-             all_except: nil, no_confirm: false }
+$options = { :dry_run => false, :assume_yes => false, :kernels_list => nil,
+             :all_except => nil, :no_confirm => false }
 OptionParser.new { |opts|
   opts.banner = "Usage: ./deKernelScript [--dry-run, --assume-yes, --kernels-list=[space separated kernel #'s]"
 

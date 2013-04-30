@@ -23,15 +23,15 @@ describe 'Cernel' do
 
   context "#ask_which_to_remove" do
     it "raises SystemExit if installed_kernels.length == 0" do
-      Cernel.stub!(:find_kernels).and_return({ installed: [] })
+      Cernel.stub!(:find_kernels).and_return({ :installed => [] })
       expect(lambda { Cernel.ask_which_to_remove }).to raise_error SystemExit
     end
 
     it "prints each one and adds to list" do
       Cernel.stub!(:find_installed_kernels).and_return(@installed_kernels)
-      ARGF.stub!(:first).and_return("y", "n", "y")
+      ARGF.stub!(:first).and_return("n", "y", "y")
 
-      expect(Cernel.ask_which_to_remove.to_s).to match(/#{@remove_kernels.to_s}/)
+      expect(Cernel.ask_which_to_remove).to eq @remove_kernels
     end
 
     it "calls 'Message.installed_kernels(installed_kernels)'" do
@@ -256,19 +256,19 @@ describe 'Cernel' do
   context "#apt_options" do
     it "returns a string of the options" do
       $options[:assume_yes] = false
-      $options[:dry_run] =    false
+      $options[:dry_run]    = false
       expect(Cernel.send(:apt_options)).to eq ""
 
       $options[:assume_yes] = true
-      $options[:dry_run] =    false
+      $options[:dry_run]    = false
       expect(Cernel.send(:apt_options)).to eq "-y"
 
       $options[:assume_yes] = false
-      $options[:dry_run] =    true
+      $options[:dry_run]    = true
       expect(Cernel.send(:apt_options)).to eq "-s"
 
       $options[:assume_yes] = true
-      $options[:dry_run] =    true
+      $options[:dry_run]    = true
       expect(Cernel.send(:apt_options)).to eq "-y -s"
     end
   end
