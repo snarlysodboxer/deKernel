@@ -7,6 +7,7 @@ describe 'Cernel' do
     $stderr.stub!(:puts)
     Kernel.stub!(:system)
   end
+
   context "#find_kernels" do
     it "finds all kernels" do
       Cernel.stub!(:find_all_kernels).and_return(@all_kernels)

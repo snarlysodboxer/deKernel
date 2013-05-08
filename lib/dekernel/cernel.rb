@@ -17,8 +17,7 @@ class Cernel
       ($stderr.puts "\n" + "No kernels selected!" ; Kernel.exit) unless kernels_to_remove.length > 0
       confirm_removals(kernels_to_remove) unless $options[:no_confirm]
       packages_list = find_kernel_packages(kernels_to_remove)
-      #IO.send(:popen, "sudo apt-get purge #{apt_options} #{packages_list.join("\s")} 1>&2") { |p| p.each { |f| $stdout.puts f } }
-      IO.send(:popen, "sudo apt-get purge #{apt_options} #{packages_list.join("")} 1>&2") { |p| p.each { |f| $stdout.puts f } }
+      IO.send(:popen, "sudo apt-get purge #{apt_options} #{packages_list.join("\s")} 1>&2") { |p| p.each { |f| $stdout.puts f } }
       if $?.exitstatus != 0
         $stdout.puts Message.purge_packages_failure($?)
       else
@@ -97,9 +96,10 @@ class Cernel
     end
 
     def apt_options
-      { :y => $options[:assume_yes], :s => $options[:dry_run] }.collect { |k, v|
-        if v ; "-#{k}" ; end
-      }.join(' ').strip
+      options = Array.new
+      if $options[:assume_yes] ; options << "-y" ; end
+      if $options[:dry_run] ; options << "-s" ; end
+      options.join(" ").strip
     end
   end
 end

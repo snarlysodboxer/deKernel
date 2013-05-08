@@ -102,8 +102,9 @@ describe 'Message' do
   end
 
   it "responds to list_command and remove_command methods" do
-    ["list", "remove"].each do |name|
-      expect(Message).to respond_to("#{name}_command")
+    { "list" => "ls -ahl", "remove" => "rm -f  " }.each do |name, command|
+      expect(Message.send("#{name}_command", @other_kernels)).
+        to eq "###       `sudo #{command} /boot/*-#{@other_kernels.first}*`"
     end
   end
 end
