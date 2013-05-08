@@ -63,6 +63,7 @@ class Cernel
     def create_kernels_to_remove_list(installed_kernels)
       installed_kernels.select { |kernel|
         $stdout.print "Do you want to remove the #{kernel} kernel [y/N/yes/NO/?]"
+        Signal.trap("SIGINT") { $stdout.puts "\nCaught exit signal, exiting!" ; Kernel.exit }
         next unless !!ARGF.first.strip.match(/^y$|^yes$/i)
         $stdout.puts "Marking #{kernel} for removal" ; true
       }
@@ -83,6 +84,7 @@ class Cernel
       all_kernels = find_kernels
       installed_kernels = all_kernels[:installed]
       Kernel.system "clear"
+      Signal.trap("SIGINT") { $stdout.puts "\nCaught exit signal, exiting!" ; Kernel.exit }
       $stdout.puts Message.ask_to_confirm_kernels_to_remove(kernels_to_remove, installed_kernels)
       ($stderr.puts "Canceled!" ; Kernel.exit) unless !!ARGF.first.strip.match(/^y$|^yes$/i)
       kernels_to_remove
