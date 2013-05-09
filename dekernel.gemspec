@@ -1,7 +1,7 @@
 Gem::Specification.new do |s|
   s.platform            = Gem::Platform::RUBY
   s.name                = 'dekernel'
-  s.version             = '0.0.0'
+  s.version             = '0.0.1'
   s.date                = '2013-04-27'
   s.summary             = 'Remove old/unused kernel packages.'
   s.description         = 'deKernel is a simple tool that finds installed kernels and automates the removal of any you choose, freeing disk space. With optional flags, it can also be automated for scripting.'
