@@ -10,19 +10,19 @@ class Cernel
       installed_kernels = find_kernels[:installed]
       $stdout.puts Message.installed_kernels(installed_kernels)
       Kernel.exit if installed_kernels.length == 0
-      kernels_to_remove = create_kernels_to_remove_list(installed_kernels)
+      kernels_to_remove = select_kernels_for_removal(installed_kernels)
     end
 
     def purge_packages_from_a_list_of_kernels(kernels_to_remove)
       ($stderr.puts "\n" + "No kernels selected!" ; Kernel.exit) unless kernels_to_remove.length > 0
       confirm_removals(kernels_to_remove) unless $options[:no_confirm]
       packages_list = find_kernel_packages(kernels_to_remove)
-      IO.send(:popen, "sudo apt-get purge #{apt_options} #{packages_list.join("\s")} 1>&2") { |p| p.each { |f| $stdout.puts f } }
-      if $?.exitstatus != 0
-        $stdout.puts Message.purge_packages_failure($?)
-      else
+      IO.popen("sudo apt-get purge #{apt_options} #{packages_list.join("\s")} 1>&2") { |p| p.each { |f| $stdout.puts f } }
+      if $?.exitstatus.zero?
         $stdout.puts Message.purge_packages_success(kernels_to_remove)
         Kernel.system "sudo apt-get clean" unless $options[:dry_run]
+      else
+        $stdout.puts Message.purge_packages_failure($?)
       end
     end
 
@@ -60,7 +60,7 @@ class Cernel
       }
     end
 
-    def create_kernels_to_remove_list(installed_kernels)
+    def select_kernels_for_removal(installed_kernels)
       installed_kernels.select { |kernel|
         $stdout.print "Do you want to remove the #{kernel} kernel [y/N/yes/NO/?]"
         Signal.trap("SIGINT") { $stdout.puts "\nCaught exit signal, exiting!" ; Kernel.exit }

@@ -183,15 +183,15 @@ describe 'Cernel' do
     end
   end
 
-  context "#create_kernels_to_remove_list(installed_kernels)" do
+  context "#select_kernels_for_removal(installed_kernels)" do
     it "returns an array" do
       ARGF.should_receive(:first).exactly(@installed_kernels.length).times.and_return('yes')
-      expect(Cernel.send(:create_kernels_to_remove_list, @installed_kernels)).to be_a_kind_of(Array)
+      expect(Cernel.send(:select_kernels_for_removal, @installed_kernels)).to be_a_kind_of(Array)
     end
-    
+
     it "returns only the kernels selected" do
       ARGF.should_receive(:first).exactly(@installed_kernels.length).times.and_return('yes', 'no', 'no')
-      expect(Cernel.send(:create_kernels_to_remove_list, @installed_kernels)).to eq @installed_kernels.first(1)
+      expect(Cernel.send(:select_kernels_for_removal, @installed_kernels)).to eq @installed_kernels.first(1)
     end
   end
 
