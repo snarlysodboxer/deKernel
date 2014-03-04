@@ -31,4 +31,4 @@ OptionParser.new { |opts|
 
 require 'dekernel'
 
-DeKernel.run
+DeKernel.new.run
